@@ -1,0 +1,120 @@
+{{ $arch := .arch }}
+{{ $imagename := .imagename }}
+{{ $rootfs := .rootfs }}
+{{ $size := .size }}
+{{ $type := .type }}
+
+architecture: {{ $arch }}
+
+actions:
+  - description: "Unpack {{ $rootfs }}"
+    action: unpack
+    compression: gz
+    file: {{ $rootfs }}.tar.gz
+
+  - description: "Setup the disk image"
+    action: image-partition
+    imagename: {{ $imagename }}.raw
+    imagesize: {{ $size }}
+    partitiontype: msdos
+    partitions:
+      - name: root
+        fs: ext4
+        start: 2048s
+        end: 100%
+        flags: [ boot ]
+    mountpoints:
+      - mountpoint: /
+        partition: root
+        options: [ errors=remount-ro ]
+
+  - action: filesystem-deploy
+    setup-kernel-cmdline: false
+
+  - description: "Create a swap file"
+    action: run
+    chroot: true
+    script: scripts/create-swapfile.sh
+
+  - description: "Install the kernel & bootloader"
+    action: apt
+    recommends: true
+    packages: [ grub-pc, linux-image-generic ]
+
+  - description: "Setup GRUB"
+    action: run
+    chroot: true
+    command: update-grub && grub-install "$IMAGE"
+
+  - description: "Install virtualization support for {{ $type }}"
+    action: apt
+    recommends: true
+  {{ if eq $type "qemu" }}
+    packages: [ qemu-guest-agent, spice-vdagent ]
+  {{ else if eq $type "virtualbox" }}
+    packages: [ virtualbox-guest-x11 ]
+  {{ else if eq $type "vmware" }}
+    packages: [ open-vm-tools-desktop ]
+  {{ else if eq $type "generic" }}
+    packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent, virtualbox-guest-x11 ]
+  {{ end }}
+
+  - description: "Configure apt sources.list"
+    action: run
+    chroot: true
+    script: scripts/finish-install.sh apt-sources
+
+  - description: "Final cleanup (from within)"
+    action: run
+    chroot: true
+    script: scripts/cleanup-in.sh
+
+  - description: "Final cleanup (from outside)"
+    action: run
+    chroot: false
+    script: scripts/cleanup-out.sh
+
+  {{ if eq $type "qemu" }}
+  - description: "Generate {{ $imagename }}.qcow2"
+    action: run
+    postprocess: true
+    command: qemu-img convert -O qcow2 {{ $imagename }}.raw {{ $imagename }}.qcow2
+  {{ else if eq $type "virtualbox" }}
+  - description: "Generate {{ $imagename }}.vmdk"
+    action: run
+    postprocess: true
+    command: qemu-img convert -O vmdk -o subformat=streamOptimized {{ $imagename }}.raw {{ $imagename }}.vmdk
+
+  - description: "Generate {{ $imagename }}.ovf"
+    action: run
+    postprocess: true
+    script: scripts/vbox/generate-ovf.sh {{ $imagename }}.vmdk
+
+  - description: "Generate {{ $imagename }}.ova"
+    action: run
+    postprocess: true
+    script: scripts/vbox/generate-ova.sh {{ $imagename }}.ovf {{ $imagename }}.vmdk
+  {{ else if eq $type "vmware" }}
+  - description: "Finish install for {{ $type }}"
+    action: run
+    chroot: true
+    script: scripts/vmware/finish-install.sh
+
+  - description: "Generate {{ $imagename }}.vmdk"
+    action: run
+    postprocess: true
+    command: |
+      rm -fr {{ $imagename }}.vmware
+      mkdir {{ $imagename }}.vmware
+      qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse {{ $imagename }}.raw {{ $imagename }}.vmware/{{ $imagename }}.vmdk
+
+  - description: "Generate {{ $imagename }}.vmx"
+    action: run
+    postprocess: true
+    script: scripts/vmware/generate-vmx.sh {{ $imagename }}.vmware/{{ $imagename }}.vmdk
+  {{ else if eq $type "generic" }}
+  - description: "Rename to {{ $imagename }}.img"
+    action: run
+    postprocess: true
+    command: mv -v {{ $imagename }}.raw {{ $imagename }}.img
+  {{ end }}

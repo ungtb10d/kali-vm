@@ -1,0 +1,26 @@
+Kali Rolling (%version%) %platform%
+%date%
+
+- - - - - - - - - - - - - - - - - -
+
+Username: kali
+Password: kali
+(%kbdlayout%)
+
+- - - - - - - - - - - - - - - - - -
+
+* Kali Homepage:
+https://www.kali.org/
+
+* Documentation:
+https://www.kali.org/docs/
+
+* Kali Tools:
+https://www.kali.org/tools/
+
+* Forum/Community Support:
+https://forums.kali.org/
+
+* IRC Channel:
+ircs://irc.oftc.net:6697/#Kali-Linux
+https://www.kali.org/docs/community/kali-linux-irc-channel/

@@ -1,0 +1,217 @@
+{{ $arch := .arch }}
+{{ $branch := .branch }}
+{{ $desktop := .desktop }}
+{{ $imagename := .imagename }}
+{{ $mirror := .mirror }}
+{{ $size := .size }}
+{{ $type := .type }}
+
+{{ $hostname := or .hostname "kali" }}
+{{ $locale := or .locale "en_US.UTF-8" }}
+{{ $timezone := or .timezone "US/Eastern" }}
+{{ $user := or .user "kali" }}
+{{ $password := or .password "kali" }}
+
+architecture: {{ $arch }}
+
+actions:
+  - action: debootstrap
+    mirror: {{ $mirror }}
+    suite: {{ $branch }}
+    components: [ main, contrib, non-free ]
+    keyring-file: kali-archive-keyring.gpg
+
+  - description: "Preseed package configuration"
+    action: run
+    chroot: true
+    script: scripts/preseed.sh
+
+  # Mimic tasksel definition of 'standard packages' by excluding libraries.
+  # Additionally, remove standard packages that are not installed in current
+  # Kali images, for whatever unclear reasons.
+  - description: "Install standard packages"
+    action: run
+    chroot: true
+    command: apt-get install -y '?priority(standard) !?section(lib) !(~napt-listchanges|~ndebian-faq|~ndoc-debian|~npython3-reportbug|~nreportbug|~nwamerican)'
+
+  - description: "Set default locale {{ $locale }}"
+    action: run
+    chroot: true
+    script: scripts/setup-locale.sh {{ $locale }}
+
+  - description: "Set default timezone {{ $timezone }}"
+    action: run
+    chroot: true
+    script: scripts/setup-timezone.sh {{ $timezone }}
+
+  - description: "Set hostname to {{ $hostname }}"
+    action: run
+    chroot: false
+    command: echo {{ $hostname }} > $ROOTDIR/etc/hostname
+
+  # Note: installing kali-desktop-core before kali-tools-top10 is needed
+  # to make sure that firefox-esr is installed, otherwise chromium gets
+  # pulled in via faraday -> python3-selenium -> chromium-driver, and then
+  # firefox-esr is not installed as chromium satisfies www-browser.
+  #
+  # Oh well. Doing so leads to a failure installing kali-desktop-xfce,
+  # and in particular libgarcon-common. Apparently a broken diversion.
+  # The error is:
+  #
+  # ~~~~
+  # Configuration file '/etc/xdg/menus/xfce-applications.menu.original'
+  #  ==> Deleted (by you or by a script) since installation.
+  #  ==> Package distributor has shipped an updated version.
+  #    What would you like to do about it ?  Your options are:
+  #     Y or I  : install the package maintainer's version
+  #     N or O  : keep your currently-installed version
+  #       D     : show the differences between the versions
+  #       Z     : start a shell to examine the situation
+  #  The default action is to keep your current version.
+  # ~~~~
+  #
+  # So let's make sure to install kali-desktop-xfce at the same time
+  # as kali-desktop-core.
+  - description: "Install core and desktop {{ $desktop }}"
+    action: apt
+    recommends: true
+    packages:
+      #- kali-linux-core
+      #- kali-desktop-core
+      #- kali-desktop-{{ $desktop }}
+      - kali-desktop-{{ $desktop }}
+      - kali-linux-core
+      - kali-linux-default
+      - kali-tools-top10
+
+#  - action: apt
+#    description: "Install tools"
+#    recommends: true
+#    packages:
+#      - kali-linux-default
+#      - kali-tools-top10
+
+#  - action: run
+#    description: "HACK - Make package list identical compared to current VM images"
+#    chroot: true
+#    script: scripts/hack-tidy-up-packages
+
+  - action: overlay
+    source: overlays/loopback-interface
+
+  - description: "Create user {{ $user }}"
+    action: run
+    chroot: true
+    script: scripts/create-user.sh {{ $user }} {{ $password }}
+
+  - description: "Finish installation"
+    action: run
+    chroot: true
+    script: scripts/finish-install.sh etc-hosts usergroups zsh
+
+  - description: "Setup the disk image"
+    action: image-partition
+    imagename: {{ $imagename }}.raw
+    imagesize: {{ $size }}
+    partitiontype: msdos
+    partitions:
+      - name: root
+        fs: ext4
+        start: 2048s
+        end: 100%
+        flags: [ boot ]
+    mountpoints:
+      - mountpoint: /
+        partition: root
+        options: [ errors=remount-ro ]
+
+  - action: filesystem-deploy
+    setup-kernel-cmdline: false
+
+  - description: "Create a swap file"
+    action: run
+    chroot: true
+    script: scripts/create-swapfile.sh
+
+  - description: "Install the kernel & bootloader"
+    action: apt
+    recommends: true
+    packages: [ grub-pc, linux-image-generic ]
+
+  - description: "Setup GRUB"
+    action: run
+    chroot: true
+    command: update-grub && grub-install "$IMAGE"
+
+  - description: "Install virtualization support for {{ $type }}"
+    action: apt
+    recommends: true
+  {{ if eq $type "qemu" }}
+    packages: [ qemu-guest-agent, spice-vdagent ]
+  {{ else if eq $type "virtualbox" }}
+    packages: [ virtualbox-guest-x11 ]
+  {{ else if eq $type "vmware" }}
+    packages: [ open-vm-tools-desktop ]
+  {{ else if eq $type "generic" }}
+    packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent, virtualbox-guest-x11 ]
+  {{ end }}
+
+  - description: "Configure apt sources.list"
+    action: run
+    chroot: true
+    script: scripts/finish-install.sh apt-sources
+
+  - description: "Final cleanup (from within)"
+    action: run
+    chroot: true
+    script: scripts/cleanup-in.sh
+
+  - description: "Final cleanup (from outside)"
+    action: run
+    chroot: false
+    script: scripts/cleanup-out.sh
+
+  {{ if eq $type "qemu" }}
+  - description: "Generate {{ $imagename }}.qcow2"
+    action: run
+    postprocess: true
+    command: qemu-img convert -O qcow2 {{ $imagename }}.raw {{ $imagename }}.qcow2
+  {{ else if eq $type "virtualbox" }}
+  - description: "Generate {{ $imagename }}.vmdk"
+    action: run
+    postprocess: true
+    command: qemu-img convert -O vmdk -o subformat=streamOptimized {{ $imagename }}.raw {{ $imagename }}.vmdk
+
+  - description: "Generate {{ $imagename }}.ovf"
+    action: run
+    postprocess: true
+    script: scripts/vbox/generate-ovf.sh {{ $imagename }}.vmdk
+
+  - description: "Generate {{ $imagename }}.ova"
+    action: run
+    postprocess: true
+    script: scripts/vbox/generate-ova.sh {{ $imagename }}.ovf {{ $imagename }}.vmdk
+  {{ else if eq $type "vmware" }}
+  - description: "Finish install for {{ $type }}"
+    action: run
+    chroot: true
+    script: scripts/vmware/finish-install.sh
+
+  - description: "Generate {{ $imagename }}.vmdk"
+    action: run
+    postprocess: true
+    command: |
+      rm -fr {{ $imagename }}.vmware
+      mkdir {{ $imagename }}.vmware
+      qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse {{ $imagename }}.raw {{ $imagename }}.vmware/{{ $imagename }}.vmdk
+
+  - description: "Generate {{ $imagename }}.vmx"
+    action: run
+    postprocess: true
+    script: scripts/vmware/generate-vmx.sh {{ $imagename }}.vmware/{{ $imagename }}.vmdk
+  {{ else if eq $type "generic" }}
+  - description: "Rename to {{ $imagename }}.img"
+    action: run
+    postprocess: true
+    command: mv -v {{ $imagename }}.raw {{ $imagename }}.img
+  {{ end }}
