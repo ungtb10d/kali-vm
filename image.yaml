@@ -1,0 +1,87 @@
+{{ $arch := or .arch "amd64" }}
+{{ $type := or .type "generic" }}
+{{ $version := or .version "localbuild" }}
+
+{{ $ospack := or .ospack (printf "ospack-%s" $arch) }}
+{{ $image := or .image (printf "Kali-Linux-%s-%s-%s" $version $type $arch) }}
+{{ $size := or .size "80GiB" }}
+
+architecture: {{ $arch }}
+
+actions:
+  - action: unpack
+    description: "Unpack {{ $ospack }}"
+    compression: gz
+    file: {{ $ospack }}.tar.gz
+
+  - action: image-partition
+    description: "Setup the disk image"
+    imagename: {{ $image }}.img
+    imagesize: {{ $size }}
+    partitiontype: msdos
+    partitions:
+      - name: root
+        fs: ext4
+        start: 2048s
+        end: 100%
+        flags: [ boot ]
+    # XXX add swap 975.00 MiB
+    mountpoints:
+      - mountpoint: /
+        partition: root
+        options: [ errors=remount-ro ]
+
+  - action: filesystem-deploy
+    setup-kernel-cmdline: false
+
+  - action: apt
+    description: "Install the kernel & bootloader"
+    recommends: true
+    packages:
+      - linux-image-{{ $arch }}
+      - grub-pc
+
+  - action: run
+    description: "Setup GRUB"
+    chroot: true
+    command: update-grub && grub-install "$IMAGE"
+
+  {{ if ne $type "generic" }}
+  - action: apt
+    description: "Install virtualization support for {{ $type }}"
+    recommends: true
+  {{ if eq $type "qemu" }}
+    packages: [ qemu-guest-agent, spice-vdagent ]
+  {{ else if eq $type "virtualbox" }}
+    packages: [ virtualbox-guest-x11 ]
+  {{ else if eq $type "vmware" }}
+    packages: [ open-vm-tools-desktop ]
+  {{ end }}
+  {{ end }}
+
+  {{ if eq $type "qemu" }}
+  - action: run
+    description: "Generate {{ $image }}.qcow2"
+    command: qemu-img convert -O qcow2 ${ARTIFACTDIR}/{{ $image }}.img ${ARTIFACTDIR}/{{ $image }}.qcow2
+  {{ else if eq $type "virtualbox" }}
+  - action: run
+    description: "Generate {{ $image }}.vmdk"
+    command: qemu-img convert -O vmdk -o subformat=streamOptimized ${ARTIFACTDIR}/{{ $image }}.img ${ARTIFACTDIR}/{{ $image }}.vmdk
+
+  - action: run
+    description: "Generate {{ $image }}.ovf"
+    script: scripts/vbox/generate-ovf.sh ${RECIPEDIR}/scripts/vbox/template.ovf ${ARTIFACTDIR}/{{ $image }}.vmdk
+
+  - action: run
+    description: "Generate {{ $image }}.ova"
+    script: scripts/vbox/generate-ova.sh ${ARTIFACTDIR}/{{ $image }}.ovf ${ARTIFACTDIR}/{{ $image }}.vmdk
+  {{ else if eq $type "vmware" }}
+  - action: run
+    description: "Finish install for {{ $type }}"
+    chroot: true
+    script: scripts/vmware/finish-install
+
+  - action: run
+    description: "Generate {{ $image }}.vmdk"
+    script: scripts/vmware/generate-vmdk.sh ${ARTIFACTDIR}/{{ $image }}.img
+  {{ end }}

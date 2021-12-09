@@ -1,0 +1,10 @@
+/*.tar.gz
+/*.img
+/*.aavmf
+/*.ovmf
+
+# virtual box
+/*.mf
+/*.ova
+/*.ovf
+/*.vmdk

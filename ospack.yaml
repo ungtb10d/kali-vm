@@ -1,0 +1,108 @@
+{{ $arch := or .arch "amd64" }}
+{{ $branch := or .branch "kali-rolling" }}
+{{ $desktop := or .desktop "xfce" }}
+
+{{ $hostname := or .hostname "kali" }}
+{{ $locale := or .locale "en_US.UTF-8" }}
+{{ $mirror := or .mirror "http://kali.download/kali" }}
+{{ $timezone := or .timezone "US/Eastern" }}
+{{ $user := or .user "kali" }}
+
+{{ $ospack := or .ospack (printf "ospack-%s" $arch) }}
+
+architecture: {{ $arch }}
+
+actions:
+  - action: debootstrap
+    mirror: {{ $mirror }}
+    suite: {{ $branch }}
+    components: [ main, contrib, non-free ]
+    keyring-file: kali-archive-keyring.gpg
+
+  - action: run
+    description: "Preseed package configuration"
+    chroot: true
+    script: scripts/preseed.sh
+
+  # 'Priority: standard' contains the package 'locales', we'll use it in the next action.
+  # Mimic tasksel definition of 'standard packages' by excluding libraries.
+  - action: run
+    description: "Install standard packages"
+    chroot: true
+    command: apt-get install -y '?priority(standard) !?section(lib)'
+
+  - action: run
+    description: "Set default locale {{ $locale }}"
+    chroot: true
+    script: scripts/setup-locale.sh {{ $locale }}
+
+  - action: run
+    description: "Set default timezone {{ $timezone }}"
+    chroot: true
+    script: scripts/setup-timezone.sh {{ $timezone }}
+
+  - action: run
+    description: "Set hostname to {{ $hostname }}"
+    chroot: false
+    command: echo {{ $hostname }} > $ROOTDIR/etc/hostname
+
+  # Note: installing kali-desktop-core before kali-tools-top10 is needed
+  # to make sure that firefox-esr is installed, otherwise chromium gets
+  # pulled in via faraday -> python3-selenium -> chromium-driver, and then
+  # firefox-esr is not installed as chromium satisfies www-browser.
+  #
+  # Oh well. Doing so leads to a failure installing kali-desktop-xfce,
+  # and in particular libgarcon-common. Apparently a broken diversion.
+  # The error is:
+  #
+  # ~~~~
+  # Configuration file '/etc/xdg/menus/xfce-applications.menu.original'
+  #  ==> Deleted (by you or by a script) since installation.
+  #  ==> Package distributor has shipped an updated version.
+  #    What would you like to do about it ?  Your options are:
+  #     Y or I  : install the package maintainer's version
+  #     N or O  : keep your currently-installed version
+  #       D     : show the differences between the versions
+  #       Z     : start a shell to examine the situation
+  #  The default action is to keep your current version.
+  # ~~~~
+  #
+  # So let's make sure to install kali-desktop-xfce at the same time
+  # as kali-desktop-core.
+  - action: apt
+    description: "Install core and desktop {{ $desktop }}"
+    recommends: true
+    packages:
+      - kali-linux-core
+      - kali-desktop-core
+      - kali-desktop-{{ $desktop }}
+
+  - action: apt
+    description: "Install tools"
+    recommends: true
+    packages:
+      - kali-linux-default
+      - kali-tools-top10
+
+  - action: run
+    description: "HACK - Make package list identical compared to current VM images"
+    chroot: true
+    script: scripts/hack-tidy-up-packages
+
+  - action: overlay
+    source: overlays/loopback-interface
+
+  - action: run
+    description: "Finish installation, add user {{ $user }}"
+    chroot: true
+    script: scripts/finish-install {{ $user }}
+
+  - action: run
+    description: "Final cleanup"
+    chroot: true
+    script: scripts/cleanup.sh
+
+  - action: pack
+    description: "Pack {{ $ospack }}"
+    compression: gz
+    file: {{ $ospack }}.tar.gz

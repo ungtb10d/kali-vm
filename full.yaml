@@ -1,0 +1,178 @@
+{{ $arch := or .arch "amd64" }}
+{{ $branch := or .branch "kali-rolling" }}
+{{ $desktop := or .desktop "xfce" }}
+{{ $type := or .type "generic" }}
+{{ $version := or .version "localbuild" }}
+
+{{ $hostname := or .hostname "kali" }}
+{{ $locale := or .locale "en_US.UTF-8" }}
+{{ $mirror := or .mirror "http://kali.download/kali" }}
+{{ $timezone := or .timezone "US/Eastern" }}
+{{ $user := or .user "kali" }}
+
+{{ $image := or .image (printf "Kali-Linux-%s-%s-%s" $version $type $arch) }}
+{{ $size := or .size "80GiB" }}
+
+architecture: {{ $arch }}
+
+actions:
+  - action: debootstrap
+    mirror: {{ $mirror }}
+    suite: {{ $branch }}
+    components: [ main, contrib, non-free ]
+    keyring-file: kali-archive-keyring.gpg
+
+  - action: run
+    description: "Preseed package configuration"
+    chroot: true
+    script: scripts/preseed.sh
+
+  # 'Priority: standard' contains the package 'locales', we'll use it in the next action.
+  # Mimic tasksel definition of 'standard packages' by excluding libraries.
+  - action: run
+    description: "Install standard packages"
+    chroot: true
+    command: apt-get install -y '?priority(standard) !?section(lib)'
+
+  - action: run
+    description: "Set default locale {{ $locale }}"
+    chroot: true
+    script: scripts/setup-locale.sh {{ $locale }}
+
+  - action: run
+    description: "Set default timezone {{ $timezone }}"
+    chroot: true
+    script: scripts/setup-timezone.sh {{ $timezone }}
+
+  - action: run
+    description: "Set hostname to {{ $hostname }}"
+    chroot: false
+    command: echo {{ $hostname }} > $ROOTDIR/etc/hostname
+
+  # Note: installing kali-desktop-core before kali-tools-top10 is needed
+  # to make sure that firefox-esr is installed, otherwise chromium gets
+  # pulled in via faraday -> python3-selenium -> chromium-driver, and then
+  # firefox-esr is not installed as chromium satisfies www-browser.
+  #
+  # Oh well. Doing so leads to a failure installing kali-desktop-xfce,
+  # and in particular libgarcon-common. Apparently a broken diversion.
+  # The error is:
+  #
+  # ~~~~
+  # Configuration file '/etc/xdg/menus/xfce-applications.menu.original'
+  #  ==> Deleted (by you or by a script) since installation.
+  #  ==> Package distributor has shipped an updated version.
+  #    What would you like to do about it ?  Your options are:
+  #     Y or I  : install the package maintainer's version
+  #     N or O  : keep your currently-installed version
+  #       D     : show the differences between the versions
+  #       Z     : start a shell to examine the situation
+  #  The default action is to keep your current version.
+  # ~~~~
+  #
+  # So let's make sure to install kali-desktop-xfce at the same time
+  # as kali-desktop-core.
+  - action: apt
+    description: "Install core and desktop {{ $desktop }}"
+    recommends: true
+    packages:
+      - kali-linux-core
+      - kali-desktop-core
+      - kali-desktop-{{ $desktop }}
+
+  - action: apt
+    description: "Install tools"
+    recommends: true
+    packages:
+      - kali-linux-default
+      - kali-tools-top10
+
+  - action: run
+    description: "HACK - Make package list identical compared to current VM images"
+    chroot: true
+    script: scripts/hack-tidy-up-packages
+
+  - action: overlay
+    source: overlays/loopback-interface
+
+  - action: run
+    description: "Finish installation, add user {{ $user }}"
+    chroot: true
+    script: scripts/finish-install {{ $user }}
+
+  - action: run
+    description: "Final cleanup"
+    chroot: true
+    script: scripts/cleanup.sh
+
+  - action: image-partition
+    description: "Setup the disk image"
+    imagename: {{ $image }}.img
+    imagesize: {{ $size }}
+    partitiontype: msdos
+    partitions:
+      - name: root
+        fs: ext4
+        start: 2048s
+        end: 100%
+        flags: [ boot ]
+    # XXX add swap 975.00 MiB
+    mountpoints:
+      - mountpoint: /
+        partition: root
+        options: [ errors=remount-ro ]
+
+  - action: filesystem-deploy
+    setup-kernel-cmdline: false
+
+  - action: apt
+    description: "Install the kernel & bootloader"
+    recommends: true
+    packages:
+      - linux-image-{{ $arch }}
+      - grub-pc
+
+  - action: run
+    description: "Setup GRUB"
+    chroot: true
+    command: update-grub && grub-install "$IMAGE"
+
+  {{ if ne $type "generic" }}
+  - action: apt
+    description: "Install virtualization support for {{ $type }}"
+    recommends: true
+  {{ if eq $type "qemu" }}
+    packages: [ qemu-guest-agent, spice-vdagent ]
+  {{ else if eq $type "virtualbox" }}
+    packages: [ virtualbox-guest-x11 ]
+  {{ else if eq $type "vmware" }}
+    packages: [ open-vm-tools-desktop ]
+  {{ end }}
+  {{ end }}
+
+  {{ if eq $type "qemu" }}
+  - action: run
+    description: "Generate {{ $image }}.qcow2"
+    command: qemu-img convert -O qcow2 ${ARTIFACTDIR}/{{ $image }}.img ${ARTIFACTDIR}/{{ $image }}.qcow2
+  {{ else if eq $type "virtualbox" }}
+  - action: run
+    description: "Generate {{ $image }}.vmdk"
+    command: qemu-img convert -O vmdk -o subformat=streamOptimized ${ARTIFACTDIR}/{{ $image }}.img ${ARTIFACTDIR}/{{ $image }}.vmdk
+
+  - action: run
+    description: "Generate {{ $image }}.ovf"
+    script: scripts/vbox/generate-ovf.sh ${RECIPEDIR}/scripts/vbox/template.ovf ${ARTIFACTDIR}/{{ $image }}.vmdk
+
+  - action: run
+    description: "Generate {{ $image }}.ova"
+    script: scripts/vbox/generate-ova.sh ${ARTIFACTDIR}/{{ $image }}.ovf ${ARTIFACTDIR}/{{ $image }}.vmdk
+  {{ else if eq $type "vmware" }}
+  - action: run
+    description: "Finish install for {{ $type }}"
+    chroot: true
+    script: scripts/vmware/finish-install
+
+  - action: run
+    description: "Generate {{ $image }}.vmdk"
+    script: scripts/vmware/generate-vmdk.sh ${ARTIFACTDIR}/{{ $image }}.img
+  {{ end }}
