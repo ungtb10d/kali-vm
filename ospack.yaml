@@ -73,21 +73,25 @@ actions:
     description: "Install core and desktop {{ $desktop }}"
     recommends: true
     packages:
+      #- kali-linux-core
+      #- kali-desktop-core
+      #- kali-desktop-{{ $desktop }}
       - kali-linux-core
-      - kali-desktop-core
+      - kali-tools-top10
+      - kali-linux-default
       - kali-desktop-{{ $desktop }}
 
-  - action: apt
-    description: "Install tools"
-    recommends: true
-    packages:
-      - kali-linux-default
-      - kali-tools-top10
+#  - action: apt
+#    description: "Install tools"
+#    recommends: true
+#    packages:
+#      - kali-linux-default
+#      - kali-tools-top10
 
-  - action: run
-    description: "HACK - Make package list identical compared to current VM images"
-    chroot: true
-    script: scripts/hack-tidy-up-packages
+#  - action: run
+#    description: "HACK - Make package list identical compared to current VM images"
+#    chroot: true
+#    script: scripts/hack-tidy-up-packages
 
   - action: overlay
     source: overlays/loopback-interface
