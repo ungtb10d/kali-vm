@@ -6,7 +6,7 @@
 
 {{ $hostname := or .hostname "kali" }}
 {{ $locale := or .locale "en_US.UTF-8" }}
-{{ $mirror := or .mirror "http://kali.download/kali" }}
+{{ $mirror := or .mirror "http://http.kali.org/kali" }}
 {{ $timezone := or .timezone "US/Eastern" }}
 {{ $user := or .user "kali" }}
 
