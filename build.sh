@@ -71,7 +71,6 @@ fi
 MEM="--scratchsize=14G"
 
 if false; then
-
 debos $MEM \
     -t arch:$ARCH \
     -t branch:$BRANCH \
@@ -81,21 +80,22 @@ debos $MEM \
     -t type:$TYPE \
     -t version:$VERSION \
     full.yaml
+fi
 
-else
-
+if true; then
 debos $MEM \
     -t arch:$ARCH \
     -t branch:$BRANCH \
     -t desktop:$DESKTOP \
     -t mirror:$MIRROR \
     ospack.yaml
+fi
 
+if false; then
 debos $MEM \
     -t arch:$ARCH \
     -t size:$SIZE \
     -t type:$TYPE \
     -t version:$VERSION \
     image.yaml
-
 fi
