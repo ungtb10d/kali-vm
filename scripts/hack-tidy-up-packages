@@ -1,5 +1,16 @@
 #!/bin/sh
 
+# Remove extra packages that are NOT installed in VM images
+# created by the kali-installer.
+#
+# These images have less packages. It seems that it's due to debian-cd,
+# which determines the list of packages included in the ISO using the
+# script tools/sort_deps. Seems like it doesn't consider all
+# recommends, so some packages end up being missing in the ISO,
+# and therefore can't be installed by the installer.
+#
+# Cf. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=601203
+
 set -e
 
 echo "Removing some Priority: standard packages"
