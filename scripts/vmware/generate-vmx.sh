@@ -13,8 +13,8 @@ vmdk_path=$1
 
 [ ${vmdk_path##*.} = vmdk ] || fail "Invalid input file '$vmdk_path'"
 
-description_template_path=scripts/templates/vm-description.txt
-vmx_template_path=scripts/templates/vmware.vmx
+description_template=scripts/templates/vm-description.txt
+vmx_template=scripts/templates/vmware.vmx
 
 
 # Prepare all the values
@@ -67,9 +67,10 @@ vmci_id=1857303575
 
 description=$(sed \
 	-e "s|%date%|$(date --iso-8601)|g" \
+	-e "s|%kbdlayout%|US keyboard layout|g" \
 	-e "s|%platform%|$platform|g" \
 	-e "s|%version%|$version|g" \
-	$description_template_path)
+	$description_template)
 
 annotation=$(echo "$description" | awk "{print}" ORS='\\|0D\\|0A')
 
@@ -85,7 +86,7 @@ sed \
 	-e "s|%guestOS%|$guest_os|g" \
 	-e "s|%nvram%|$nvram|g" \
 	-e "s|%vmciId%|$vmci_id|g" \
-	$vmx_template_path > $output
+	$vmx_template > $output
 
 # Tweaks for i386, is it really needed?
 if [ $arch = i386 ]; then
@@ -95,7 +96,11 @@ if [ $arch = i386 ]; then
 		$output
 fi
 
-unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output)
+# XXX For now we don't bother with vmxf or nvram
+#sed -i "/^extendedConfigFile/d" $output
+#sed -i "/^nvram/d" $output
+
+unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output || :)
 if [ "$unmatched_patterns" ]; then
 	echo "Some patterns where not replaced in '$output':" >&2
 	echo "$unmatched_patterns" >&2

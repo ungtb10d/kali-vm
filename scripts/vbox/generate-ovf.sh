@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# XXX In long description, shouldn't hardcode "US keyboard layout"
-
 set -eu
 
 fail() { echo "$@" >&2; exit 1; }
@@ -15,8 +13,8 @@ vmdk_path=$1
 
 [ ${vmdk_path##*.} = vmdk ] || fail "Invalid input file '$vmdk_path'"
 
-description_template_path=scripts/templates/vm-description.txt
-ovf_template_path=script/templates/vbox.ovf
+description_template=scripts/templates/vm-description.txt
+ovf_template=script/templates/vbox.ovf
 
 
 # Prepare all the values
@@ -80,9 +78,10 @@ esac
 
 description=$(sed \
 	-e "s|%date%|$(date --iso-8601)|g" \
+	-e "s|%kbdlayout%|US keyboard layout|g" \
 	-e "s|%platform%|$platform|g" \
 	-e "s|%version%|$version|g" \
-	$description_template_path)
+	$description_template)
 
 # Create the .ovf file
 
@@ -105,12 +104,12 @@ sed \
 	-e "s|%VendorUrl%|$vendor_url|g" \
 	-e "s|%VirtualSystemId%|$name|g" \
 	-e "s|%VirtualSystemIdentifier%|$name|g" \
-	$ovf_template_path > $output
+	$ovf_template > $output
 
 awk -v r="$description" '{gsub(/%Description%/,r)}1' $output > $output.1
 mv $output.1 $output
 
-unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output)
+unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output || :)
 if [ "$unmatched_patterns" ]; then
 	echo "Some patterns where not replaced in '$output':" >&2
 	echo "$unmatched_patterns" >&2
