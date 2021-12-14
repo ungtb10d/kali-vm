@@ -153,19 +153,23 @@ actions:
   {{ if eq $type "qemu" }}
   - action: run
     description: "Generate {{ $image }}.qcow2"
-    command: qemu-img convert -O qcow2 ${ARTIFACTDIR}/{{ $image }}.img ${ARTIFACTDIR}/{{ $image }}.qcow2
+    postprocess: true
+    command: qemu-img convert -O qcow2 {{ $image }}.img {{ $image }}.qcow2
   {{ else if eq $type "virtualbox" }}
   - action: run
     description: "Generate {{ $image }}.vmdk"
-    command: qemu-img convert -O vmdk -o subformat=streamOptimized ${ARTIFACTDIR}/{{ $image }}.img ${ARTIFACTDIR}/{{ $image }}.vmdk
+    postprocess: true
+    command: qemu-img convert -O vmdk -o subformat=streamOptimized {{ $image }}.img {{ $image }}.vmdk
 
   - action: run
     description: "Generate {{ $image }}.ovf"
-    script: scripts/vbox/generate-ovf.sh ${RECIPEDIR}/scripts/vbox/template.ovf ${ARTIFACTDIR}/{{ $image }}.vmdk
+    postprocess: true
+    script: scripts/vbox/generate-ovf.sh {{ $image }}.vmdk
 
   - action: run
     description: "Generate {{ $image }}.ova"
-    script: scripts/vbox/generate-ova.sh ${ARTIFACTDIR}/{{ $image }}.ovf ${ARTIFACTDIR}/{{ $image }}.vmdk
+    postprocess: true
+    script: scripts/vbox/generate-ova.sh {{ $image }}.ovf {{ $image }}.vmdk
   {{ else if eq $type "vmware" }}
   - action: run
     description: "Finish install for {{ $type }}"
@@ -174,5 +178,14 @@ actions:
 
   - action: run
     description: "Generate {{ $image }}.vmdk"
-    script: scripts/vmware/generate-vmdk.sh ${ARTIFACTDIR}/{{ $image }}.img
+    postprocess: true
+    command: |
+      rm -fr {{ $image }}.vmware
+      mkdir {{ $image }}.vmware
+      qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse {{ $image }}.img {{ $image }}.vmware/{{ $image }}.vmdk
+
+  - action: run
+    description: "Generate {{ $image }}.vmx"
+    postprocess: true
+    script: scripts/vmware/generate-vmx.sh {{ $image }}.vmware/{{ $image }}.vmdk
   {{ end }}

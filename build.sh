@@ -82,7 +82,7 @@ debos $MEM \
     full.yaml
 fi
 
-if true; then
+if false; then
 debos $MEM \
     -t arch:$ARCH \
     -t branch:$BRANCH \
@@ -91,7 +91,7 @@ debos $MEM \
     ospack.yaml
 fi
 
-if false; then
+if true; then
 debos $MEM \
     -t arch:$ARCH \
     -t size:$SIZE \

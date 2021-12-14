@@ -5,17 +5,19 @@
 set -eu
 
 fail() { echo "$@" >&2; exit 1; }
-usage() { fail "Usage: $(basename $0) TEMPLATE VMDK"; }
+usage() { fail "Usage: $(basename $0) VMDK"; }
 
 # Validate arguments
 
-[ $# -eq 2 ] || usage
+[ $# -eq 1 ] || usage
 
-template_path=$1; shift
-vmdk_path=$1; shift
+vmdk_path=$1
 
-[ ${template_path##*.} = ovf ] || fail "Invalid input file '$template_path'"
 [ ${vmdk_path##*.} = vmdk ] || fail "Invalid input file '$vmdk_path'"
+
+description_template_path=scripts/templates/vm-description.txt
+ovf_template_path=script/templates/vbox.ovf
+
 
 # Prepare all the values
 
@@ -43,12 +45,14 @@ case $arch in
 		long_mode=true
 		os_id=96
 		os_type=Debian_64
+		platform=x64
 		product_version="$product_version x64"
 		;;
 	i386)
 		long_mode=false
 		os_id=95
 		os_type=Debian
+		platform=x86
 		product_version="$product_version x86"
 		;;
 	*)
@@ -71,33 +75,14 @@ esac
 #disk_uuid=b75fc92d-4a0f-43c8-b3fa-7e44dc561220
 #machine_uuid=67890c86-5d34-4d71-b682-fa9e99099f8c
 
-long_description="Kali $product_version
-$(date --iso-8601)
 
-- - - - - - - - - - - - - - - - - -
+# Create the description
 
-Username: kali
-Password: kali
-(US keyboard layout)
-
-- - - - - - - - - - - - - - - - - -
-
-* Kali Homepage:
-https://www.kali.org/
-
-* Documentation:
-https://www.kali.org/docs/
-
-* Kali Tools:
-https://www.kali.org/tools/
-
-* Forum/Community Support:
-https://forums.kali.org/
-
-* IRC Channel:
-ircs://irc.oftc.net:6697/#Kali-Linux
-https://www.kali.org/docs/community/kali-linux-irc-channel/
-"
+description=$(sed \
+	-e "s|%date%|$(date --iso-8601)|g" \
+	-e "s|%platform%|$platform|g" \
+	-e "s|%version%|$version|g" \
+	$description_template_path)
 
 # Create the .ovf file
 
@@ -120,12 +105,12 @@ sed \
 	-e "s|%VendorUrl%|$vendor_url|g" \
 	-e "s|%VirtualSystemId%|$name|g" \
 	-e "s|%VirtualSystemIdentifier%|$name|g" \
-	$template_path > $output
+	$ovf_template_path > $output
 
-awk -v r="$long_description" '{gsub(/%Description%/,r)}1' $output > $output.1
+awk -v r="$description" '{gsub(/%Description%/,r)}1' $output > $output.1
 mv $output.1 $output
 
-unmatched_patterns=$(grep -E -n "%[A-Za-z]+%" $output)
+unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output)
 if [ "$unmatched_patterns" ]; then
 	echo "Some patterns where not replaced in '$output':" >&2
 	echo "$unmatched_patterns" >&2
