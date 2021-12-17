@@ -88,7 +88,7 @@ debos $MEM \
     -t branch:$BRANCH \
     -t desktop:$DESKTOP \
     -t mirror:$MIRROR \
-    ospack.yaml
+    rootfs.yaml
 fi
 
 if true; then

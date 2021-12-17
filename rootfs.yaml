@@ -9,7 +9,7 @@
 {{ $user := or .user "kali" }}
 {{ $password := or .password "kali" }}
 
-{{ $ospack := or .ospack (printf "ospack-%s" $arch) }}
+{{ $rootfs := or .rootfs (printf "rootfs-%s" $arch) }}
 
 architecture: {{ $arch }}
 
@@ -114,6 +114,6 @@ actions:
     script: scripts/cleanup.sh
 
   - action: pack
-    description: "Pack {{ $ospack }}"
+    description: "Pack {{ $rootfs }}"
     compression: gz
-    file: {{ $ospack }}.tar.gz
+    file: {{ $rootfs }}.tar.gz

@@ -2,7 +2,7 @@
 {{ $type := or .type "generic" }}
 {{ $version := or .version "localbuild" }}
 
-{{ $ospack := or .ospack (printf "ospack-%s" $arch) }}
+{{ $rootfs := or .rootfs (printf "rootfs-%s" $arch) }}
 {{ $image := or .image (printf "Kali-Linux-%s-%s-%s" $version $type $arch) }}
 {{ $size := or .size "80GiB" }}
 
@@ -10,9 +10,9 @@ architecture: {{ $arch }}
 
 actions:
   - action: unpack
-    description: "Unpack {{ $ospack }}"
+    description: "Unpack {{ $rootfs }}"
     compression: gz
-    file: {{ $ospack }}.tar.gz
+    file: {{ $rootfs }}.tar.gz
 
   - action: image-partition
     description: "Setup the disk image"
