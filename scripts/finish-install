@@ -24,16 +24,6 @@ END
     apt-get update
 }
 
-create_user() {
-    user=$1
-
-    echo "INFO: create user '$user'"
-    adduser --disabled-password --gecos '' $user
-
-    echo "INFO: set user password"
-    echo $user:$user | chpasswd
-}
-
 get_user_list() {
     for user in $(cd /home && ls); do
 	if ! getent passwd "$user" >/dev/null; then
@@ -87,7 +77,6 @@ EOF
     chmod 0440 /etc/sudoers.d/$user
 }
 
-create_user $1
 configure_sources_list
 configure_zsh
 configure_usergroups

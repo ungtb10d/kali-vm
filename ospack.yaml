@@ -7,6 +7,7 @@
 {{ $mirror := or .mirror "http://http.kali.org/kali" }}
 {{ $timezone := or .timezone "US/Eastern" }}
 {{ $user := or .user "kali" }}
+{{ $password := or .password "kali" }}
 
 {{ $ospack := or .ospack (printf "ospack-%s" $arch) }}
 
@@ -97,7 +98,12 @@ actions:
     source: overlays/loopback-interface
 
   - action: run
-    description: "Finish installation, add user {{ $user }}"
+    description: "Create user {{ $user }}"
+    chroot: true
+    script: scripts/create-user.sh {{ $user }} {{ $password }}
+
+  - action: run
+    description: "Finish installation"
     chroot: true
     script: scripts/finish-install {{ $user }}
 
