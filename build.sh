@@ -82,7 +82,7 @@ debos $MEM \
     full.yaml
 fi
 
-if false; then
+if true; then
 debos $MEM \
     -t arch:$ARCH \
     -t branch:$BRANCH \
