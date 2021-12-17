@@ -25,12 +25,13 @@ actions:
     chroot: true
     script: scripts/preseed.sh
 
-  # 'Priority: standard' contains the package 'locales', we'll use it in the next action.
   # Mimic tasksel definition of 'standard packages' by excluding libraries.
+  # Additionally, remove standard packages that are not installed in current
+  # Kali images, for whatever unclear reasons.
   - action: run
     description: "Install standard packages"
     chroot: true
-    command: apt-get install -y '?priority(standard) !?section(lib)'
+    command: apt-get install -y '?priority(standard) !?section(lib) !(~napt-listchanges|~ndebian-faq|~ndoc-debian|~npython3-reportbug|~nreportbug|~nwamerican)'
 
   - action: run
     description: "Set default locale {{ $locale }}"
@@ -77,10 +78,10 @@ actions:
       #- kali-linux-core
       #- kali-desktop-core
       #- kali-desktop-{{ $desktop }}
-      - kali-linux-core
-      - kali-tools-top10
-      - kali-linux-default
       - kali-desktop-{{ $desktop }}
+      - kali-linux-core
+      - kali-linux-default
+      - kali-tools-top10
 
 #  - action: apt
 #    description: "Install tools"

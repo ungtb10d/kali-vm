@@ -1,32 +1,23 @@
 #!/bin/sh
 
-# Remove extra packages that are NOT installed in VM images
-# created by the kali-installer.
+# Remove extra packages that are NOT installed in Kali systems
+# created with the Kali installer.
 #
-# These images have less packages. It seems that it's due to debian-cd,
-# which determines the list of packages included in the ISO using the
-# script tools/sort_deps. Seems like it doesn't consider all
-# recommends, so some packages end up being missing in the ISO,
-# and therefore can't be installed by the installer.
+# This difference is due to debian-cd, which has its own logic to
+# include packages in the ISO, and doesn't simply resolve all the
+# dependencies + recommends and add them all to the ISO.  Instead
+# it seems that debian-cd doesn't follow the Recommends chain to
+# the end and stops at level 1 (or something like that, not
+# completely clear to me).
+#
+# The consequence is that a some recommended packages are not
+# present on the ISO, and therefore are not installed (unless
+# network mirrors are enabled during the installation, but that's
+# not the case by default for Kali).
 #
 # Cf. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=601203
 
 set -e
-
-echo "Removing some Priority: standard packages"
-
-PKGS="
-apt-listchanges
-debian-faq
-doc-debian
-python3-reportbug
-reportbug
-wamerican
-"
-
-apt-get purge -y $PKGS
-
-echo "Removing more packages"
 
 PKGS="
 chromium
@@ -115,13 +106,9 @@ pocketsphinx-en-us
 proj-bin
 python3-cups
 python3-cupshelpers
-python3-debconf
-python3-debianbts
-python3-httplib2
 python3-opengl
 python3-pip
 python3-pyqt5.qtopengl
-python3-pysimplesoap
 python3-smbc
 python3-wheel
 python-odf-doc
@@ -131,6 +118,7 @@ ruby2.7-doc
 sntp
 sound-icons
 speech-dispatcher-espeak-ng
+spice-vdagent
 system-config-printer
 system-config-printer-common
 system-config-printer-udev
