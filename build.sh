@@ -20,12 +20,13 @@ VERSION=localbuild
 USAGE="Usage: $(basename $0) [-a ARCH] [-b BRANCH] [-d DESKTOP] [-m MIRROR] [-s SIZE] [-t TYPE] [-v VERSION]
 
 Build a Kali OS image. The partition table is msdos.
-Defaults to a $TYPE image of size $SIZE.
+By default, build a $TYPE image of size $SIZE.
 
-* supported architectures: $SUPPORTED_ARCHITECTURES
-* supported branches ... : $SUPPORTED_BRANCHES
-* supported desktops ... : $SUPPORTED_DESKTOPS
-* supported types ...... : $SUPPORTED_TYPES
+Supported values for options:
+* architectures: $SUPPORTED_ARCHITECTURES
+* branches ... : $SUPPORTED_BRANCHES
+* desktops ... : $SUPPORTED_DESKTOPS
+* types ...... : $SUPPORTED_TYPES
 "
 
 fail() { echo "$@" >&2; exit 1; }
@@ -57,7 +58,7 @@ echo $SUPPORTED_TYPES | grep -qw $TYPE \
 
 echo "Build a Kali $(b $TYPE) image for the $(b $ARCH) architecture. Disk size: $(b $SIZE)."
 echo "Use the $(b $BRANCH) branch, install the $(b $DESKTOP) desktop environment."
-echo "Build image using the mirror $(b $MIRROR)."
+echo "Build the image using the mirror $(b $MIRROR)."
 read -p "Ok? "
 
 if ! [ -v http_proxy ]; then
