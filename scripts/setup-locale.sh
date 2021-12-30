@@ -10,6 +10,6 @@ if ! grep -q "^# $locale " /etc/locale.gen; then
 fi
 
 pattern=$(echo $locale | sed 's/\./\\./g')
-sed -i "/# $pattern /s/^# //" /etc/locale.gen
+sed -i "/^# $pattern /s/^# //" /etc/locale.gen
 locale-gen
 update-locale LANG=$locale
