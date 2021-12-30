@@ -57,8 +57,9 @@ configure_usergroups() {
     # adm - read access to log files
     # dialout - for serial access
     # kaboxer - for kaboxer
+    # sudo - be root
     # wireshark - capture sessions in wireshark
-    kali_groups="adm,dialout,kaboxer,wireshark"
+    kali_groups="adm,dialout,kaboxer,sudo,wireshark"
 
     for user in $(get_user_list); do
 	echo "INFO: adding user '$user' to groups '$kali_groups'"
@@ -66,18 +67,6 @@ configure_usergroups() {
     done
 }
 
-configure_sudo() {
-    user=$1
-
-    echo "INFO: setup sudo for user $user"
-    mkdir -p /etc/sudoers.d/
-    cat << 'EOF' > /etc/sudoers.d/$user
-%sudo    ALL=(ALL) NOPASSWD: /usr/bin/su
-EOF
-    chmod 0440 /etc/sudoers.d/$user
-}
-
 configure_sources_list
 configure_zsh
 configure_usergroups
-#configure_sudo $1
