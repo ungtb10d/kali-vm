@@ -1,3 +1,0 @@
-# FQDN lookup is painfully slow if the DNS server is misconfigured.
-# Use gethostname() instead.
-Defaults !fqdn
