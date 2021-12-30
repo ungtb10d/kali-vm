@@ -109,6 +109,11 @@ actions:
     script: scripts/finish-install {{ $user }}
 
   - action: run
+    description: "Finish installation (network)"
+    chroot: true
+    script: scripts/finish-install-network.sh
+
+  - action: run
     description: "Final cleanup"
     chroot: true
     script: scripts/cleanup.sh
