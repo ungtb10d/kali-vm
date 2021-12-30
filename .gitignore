@@ -1,5 +1,10 @@
-/*.tar.gz
 /*.img
+/*.tar.gz
+
+# qemu
+/*.qcow2
+
+# edk2
 /*.aavmf
 /*.ovmf
 
