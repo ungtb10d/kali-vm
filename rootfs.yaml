@@ -114,9 +114,14 @@ actions:
     script: scripts/finish-install-network.sh
 
   - action: run
-    description: "Final cleanup"
+    description: "Final cleanup (from within)"
     chroot: true
-    script: scripts/cleanup.sh
+    script: scripts/cleanup-in.sh
+
+  - action: run
+    description: "Final cleanup (from outside)"
+    chroot: false
+    script: scripts/cleanup-out.sh
 
   - action: pack
     description: "Pack {{ $rootfs }}"

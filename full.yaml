@@ -116,11 +116,6 @@ actions:
     chroot: true
     script: scripts/finish-install-network.sh
 
-  - action: run
-    description: "Final cleanup"
-    chroot: true
-    script: scripts/cleanup.sh
-
   - action: image-partition
     description: "Setup the disk image"
     imagename: {{ $image }}.img
@@ -165,6 +160,16 @@ actions:
     packages: [ open-vm-tools-desktop ]
   {{ end }}
   {{ end }}
+
+  - action: run
+    description: "Final cleanup (from within)"
+    chroot: true
+    script: scripts/cleanup-in.sh
+
+  - action: run
+    description: "Final cleanup (from outside)"
+    chroot: false
+    script: scripts/cleanup-out.sh
 
   {{ if eq $type "qemu" }}
   - action: run
