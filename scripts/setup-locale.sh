@@ -5,8 +5,8 @@ set -eu
 locale=$1
 
 if ! grep -q "^# $locale " /etc/locale.gen; then
-	echo "ERROR: invalid locale '$locale'"
-	exit 1
+    echo "ERROR: invalid locale '$locale'"
+    exit 1
 fi
 
 pattern=$(echo $locale | sed 's/\./\\./g')

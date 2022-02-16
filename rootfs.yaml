@@ -1,15 +1,14 @@
-{{ $arch := or .arch "amd64" }}
-{{ $branch := or .branch "kali-rolling" }}
-{{ $desktop := or .desktop "xfce" }}
+{{ $arch := .arch }}
+{{ $branch := .branch }}
+{{ $desktop := .desktop }}
+{{ $mirror := .mirror }}
+{{ $rootfs := .rootfs }}
 
 {{ $hostname := or .hostname "kali" }}
 {{ $locale := or .locale "en_US.UTF-8" }}
-{{ $mirror := or .mirror "http://http.kali.org/kali" }}
 {{ $timezone := or .timezone "US/Eastern" }}
 {{ $user := or .user "kali" }}
 {{ $password := or .password "kali" }}
-
-{{ $rootfs := or .rootfs (printf "rootfs-%s" $arch) }}
 
 architecture: {{ $arch }}
 
@@ -20,31 +19,31 @@ actions:
     components: [ main, contrib, non-free ]
     keyring-file: kali-archive-keyring.gpg
 
-  - action: run
-    description: "Preseed package configuration"
+  - description: "Preseed package configuration"
+    action: run
     chroot: true
     script: scripts/preseed.sh
 
   # Mimic tasksel definition of 'standard packages' by excluding libraries.
   # Additionally, remove standard packages that are not installed in current
   # Kali images, for whatever unclear reasons.
-  - action: run
-    description: "Install standard packages"
+  - description: "Install standard packages"
+    action: run
     chroot: true
     command: apt-get install -y '?priority(standard) !?section(lib) !(~napt-listchanges|~ndebian-faq|~ndoc-debian|~npython3-reportbug|~nreportbug|~nwamerican)'
 
-  - action: run
-    description: "Set default locale {{ $locale }}"
+  - description: "Set default locale {{ $locale }}"
+    action: run
     chroot: true
     script: scripts/setup-locale.sh {{ $locale }}
 
-  - action: run
-    description: "Set default timezone {{ $timezone }}"
+  - description: "Set default timezone {{ $timezone }}"
+    action: run
     chroot: true
     script: scripts/setup-timezone.sh {{ $timezone }}
 
-  - action: run
-    description: "Set hostname to {{ $hostname }}"
+  - description: "Set hostname to {{ $hostname }}"
+    action: run
     chroot: false
     command: echo {{ $hostname }} > $ROOTDIR/etc/hostname
 
@@ -71,8 +70,8 @@ actions:
   #
   # So let's make sure to install kali-desktop-xfce at the same time
   # as kali-desktop-core.
-  - action: apt
-    description: "Install core and desktop {{ $desktop }}"
+  - description: "Install core and desktop {{ $desktop }}"
+    action: apt
     recommends: true
     packages:
       #- kali-linux-core
@@ -98,32 +97,32 @@ actions:
   - action: overlay
     source: overlays/loopback-interface
 
-  - action: run
-    description: "Create user {{ $user }}"
+  - description: "Create user {{ $user }}"
+    action: run
     chroot: true
     script: scripts/create-user.sh {{ $user }} {{ $password }}
 
-  - action: run
-    description: "Finish installation"
+  - description: "Finish installation"
+    action: run
     chroot: true
-    script: scripts/finish-install {{ $user }}
+    script: scripts/finish-install.sh {{ $user }}
 
-  - action: run
-    description: "Finish installation (network)"
+  - description: "Finish installation (network)"
+    action: run
     chroot: true
     script: scripts/finish-install-network.sh
 
-  - action: run
-    description: "Final cleanup (from within)"
+  - description: "Final cleanup (from within)"
+    action: run
     chroot: true
     script: scripts/cleanup-in.sh
 
-  - action: run
-    description: "Final cleanup (from outside)"
+  - description: "Final cleanup (from outside)"
+    action: run
     chroot: false
     script: scripts/cleanup-out.sh
 
-  - action: pack
-    description: "Pack {{ $rootfs }}"
+  - description: "Pack {{ $rootfs }}"
+    action: pack
     compression: gz
     file: {{ $rootfs }}.tar.gz

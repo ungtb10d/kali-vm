@@ -30,18 +30,18 @@ version=$(echo $name | cut -d- -f3)
 vmci_id=$(od -vAn -N4 -tu4 < /dev/urandom)
 
 case $arch in
-	amd64)
-		platform=x64
-		guest_os=debian10-64
-		;;
-	i386)
-		platform=x86
-		guest_os=debian10
-		;;
-	*)
-		echo "Invalid architecture '$arch'" >&2
-		exit 1
-		;;
+    amd64)
+        platform=x64
+        guest_os=debian10-64
+        ;;
+    i386)
+        platform=x86
+        guest_os=debian10
+        ;;
+    *)
+        echo "Invalid architecture '$arch'" >&2
+        exit 1
+        ;;
 esac
 
 # Overrides for Kali 2021.4 amd64
@@ -66,11 +66,11 @@ vmci_id=1857303575
 # Create the description
 
 description=$(sed \
-	-e "s|%date%|$(date --iso-8601)|g" \
-	-e "s|%kbdlayout%|US keyboard layout|g" \
-	-e "s|%platform%|$platform|g" \
-	-e "s|%version%|$version|g" \
-	$description_template)
+    -e "s|%date%|$(date --iso-8601)|g" \
+    -e "s|%kbdlayout%|US keyboard layout|g" \
+    -e "s|%platform%|$platform|g" \
+    -e "s|%version%|$version|g" \
+    $description_template)
 
 annotation=$(echo "$description" | awk "{print}" ORS='\\|0D\\|0A')
 
@@ -79,21 +79,21 @@ annotation=$(echo "$description" | awk "{print}" ORS='\\|0D\\|0A')
 output=${vmdk_path%.*}.vmx
 
 sed \
-	-e "s|%annotation%|$annotation|g" \
-	-e "s|%displayName%|$name|g" \
-	-e "s|%extendedConfigFile%|$vmxf|g" \
-	-e "s|%fileName%|$vmdk|g" \
-	-e "s|%guestOS%|$guest_os|g" \
-	-e "s|%nvram%|$nvram|g" \
-	-e "s|%vmciId%|$vmci_id|g" \
-	$vmx_template > $output
+    -e "s|%annotation%|$annotation|g" \
+    -e "s|%displayName%|$name|g" \
+    -e "s|%extendedConfigFile%|$vmxf|g" \
+    -e "s|%fileName%|$vmdk|g" \
+    -e "s|%guestOS%|$guest_os|g" \
+    -e "s|%nvram%|$nvram|g" \
+    -e "s|%vmciId%|$vmci_id|g" \
+    $vmx_template > $output
 
 # Tweaks for i386, is it really needed?
 if [ $arch = i386 ]; then
-	sed -i \
-		-e "/^ethernet0\.virtualDev/d" \
-		-e "/^vcpu\.hotadd/d" \
-		$output
+    sed -i \
+        -e "/^ethernet0\.virtualDev/d" \
+        -e "/^vcpu\.hotadd/d" \
+        $output
 fi
 
 # XXX For now we don't bother with vmxf or nvram
@@ -102,7 +102,7 @@ fi
 
 unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output || :)
 if [ "$unmatched_patterns" ]; then
-	echo "Some patterns where not replaced in '$output':" >&2
-	echo "$unmatched_patterns" >&2
-	exit 1
+    echo "Some patterns where not replaced in '$output':" >&2
+    echo "$unmatched_patterns" >&2
+    exit 1
 fi

@@ -1,12 +1,11 @@
 #!/bin/bash
 
-set -e
-set -u
+set -eu
 
 SUPPORTED_ARCHITECTURES="amd64 arm64"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
-SUPPORTED_TYPES="qemu rootfs virtualbox vmware"
+SUPPORTED_TYPES="generic qemu rootfs virtualbox vmware"
 DEFAULT_HTTP_PROXY=http://10.0.2.2:3142
 
 ARCH=amd64
@@ -14,13 +13,20 @@ BRANCH=kali-last-snapshot
 DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
 SIZE=80GiB
-TYPE=qemu
+TYPE=generic
 VERSION=localbuild
+
+fail() { echo "$@" >&2; exit 1; }
+b() { tput bold; echo -n "$@"; tput sgr0; }
+
+[ $(id -u) -eq 0 ] && fail "No need to be root. Please run as normal user."
 
 USAGE="Usage: $(basename $0) [-a ARCH] [-b BRANCH] [-d DESKTOP] [-m MIRROR] [-s SIZE] [-t TYPE] [-v VERSION]
 
-Build a Kali OS image. The partition table is msdos.
-By default, build a $TYPE image of size $SIZE.
+Build a Kali Linux OS image.
+By default, build a $(b $ARCH $TYPE) image of size $(b $SIZE),
+use the branch $(b $BRANCH) and the mirror $(b $MIRROR).
+Install the $(b $DESKTOP) desktop environment.
 
 Supported values for options:
 * architectures: $SUPPORTED_ARCHITECTURES
@@ -29,20 +35,17 @@ Supported values for options:
 * types ...... : $SUPPORTED_TYPES
 "
 
-fail() { echo "$@" >&2; exit 1; }
-b() { tput bold; echo -n "$@"; tput sgr0; }
-
 while getopts ':a:b:d:hm:s:t:v:' opt; do
     case $opt in
-	(a) ARCH=$OPTARG ;;
-	(b) BRANCH=$OPTARG ;;
-	(d) DESKTOP=$OPTARG ;;
-	(h) echo "$USAGE" && exit 0 ;;
-	(m) MIRRROR=$OPTARG ;;
-	(s) SIZE=$OPTARG ;;
-	(t) TYPE=$OPTARG ;;
-	(v) VERSION=$OPTARG ;;
-	(*) fail "$USAGE" ;;
+        (a) ARCH=$OPTARG ;;
+        (b) BRANCH=$OPTARG ;;
+        (d) DESKTOP=$OPTARG ;;
+        (h) echo "$USAGE" && exit 0 ;;
+        (m) MIRRROR=$OPTARG ;;
+        (s) SIZE=$OPTARG ;;
+        (t) TYPE=$OPTARG ;;
+        (v) VERSION=$OPTARG ;;
+        (*) fail "$USAGE" ;;
     esac
 done
 shift $((OPTIND - 1))
@@ -72,33 +75,41 @@ if ! [ -v http_proxy ]; then
     export http_proxy=$DEFAULT_HTTP_PROXY
 fi
 
-#MEM="-m 8G"
-MEM="--scratchsize=14G"
+# XXX Size required shouldn't change, but user should be allowed to decide
+# whether they want to use RAM or DISK . Default should be disk, while RAM
+# should't be allowed if not enough free RAM.
+
+#OPTS="-m 8G"
+OPTS="--scratchsize=14G"
+ROOTFS=rootfs-$ARCH
+IMAGE=kali-linux-$VERSION-$TYPE-$ARCH
 
 if [ $TYPE = rootfs ]; then
-    debos $MEM \
+    debos $OPTS \
         -t arch:$ARCH \
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
         -t mirror:$MIRROR \
+        -t rootfs:$ROOTFS \
         rootfs.yaml
-elif [ -e rootfs-$ARCH.tar.gz ]; then
-    echo "Re-using the existing rootfs rootfs-$ARCH.tar.gz."
+elif [ -e $ROOTFS.tar.gz ]; then
+    echo "Re-using the existing rootfs $ROOTFS.tar.gz."
     read -p "Ok? "
-    debos $MEM \
+    debos $OPTS \
         -t arch:$ARCH \
+        -t imagename:$IMAGE \
+        -t rootfs:$ROOTFS \
         -t size:$SIZE \
         -t type:$TYPE \
-        -t version:$VERSION \
         image.yaml
 else
-    debos $MEM \
+    debos $OPTS \
         -t arch:$ARCH \
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
+        -t imagename:$IMAGE \
         -t mirror:$MIRROR \
         -t size:$SIZE \
         -t type:$TYPE \
-        -t version:$VERSION \
         full.yaml
 fi
