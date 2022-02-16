@@ -140,8 +140,8 @@ actions:
     description: "Install the kernel & bootloader"
     recommends: true
     packages:
-      - linux-image-{{ $arch }}
       - grub-pc
+      - linux-image-generic
 
   - action: run
     description: "Setup GRUB"
