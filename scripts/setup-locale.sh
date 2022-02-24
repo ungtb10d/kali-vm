@@ -4,12 +4,14 @@ set -eu
 
 locale=$1
 
-if ! grep -q "^# $locale " /etc/locale.gen; then
+# escape dots in order to use as a pattern to match
+pattern=$(echo $locale | sed "s/\./\\./g")
+
+if ! grep -q "^# $pattern " /etc/locale.gen; then
     echo "ERROR: invalid locale '$locale'"
     exit 1
 fi
 
-pattern=$(echo $locale | sed 's/\./\\./g')
 sed -i "/^# $pattern /s/^# //" /etc/locale.gen
 locale-gen
 update-locale LANG=$locale

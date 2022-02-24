@@ -4,7 +4,7 @@ set -eu
 
 zone=$1
 
-if [ -z "$zone" ] || [ ! -e /usr/share/zoneinfo/$zone ]; then
+if ! [ -e /usr/share/zoneinfo/$zone ]; then
     echo "ERROR: invalid time zone '$zone'"
     exit 1
 fi
