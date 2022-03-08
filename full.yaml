@@ -125,8 +125,6 @@ actions:
         start: 2048s
         end: 100%
         flags: [ boot ]
-    # XXX add swap 975.00 MiB
-    # XXX do we add parttype for both?
     mountpoints:
       - mountpoint: /
         partition: root
@@ -134,6 +132,11 @@ actions:
 
   - action: filesystem-deploy
     setup-kernel-cmdline: false
+
+  - description: "Create a swap file"
+    action: run
+    chroot: true
+    script: scripts/create-swapfile.sh
 
   - description: "Install the kernel & bootloader"
     action: apt
