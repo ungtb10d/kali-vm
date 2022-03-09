@@ -109,11 +109,6 @@ actions:
     chroot: true
     script: scripts/finish-install.sh {{ $user }}
 
-  - description: "Finish installation (network)"
-    action: run
-    chroot: true
-    script: scripts/finish-install-network.sh
-
   - description: "Setup the disk image"
     action: image-partition
     imagename: {{ $imagename }}.img

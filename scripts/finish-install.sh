@@ -67,6 +67,24 @@ configure_usergroups() {
     done
 }
 
+configure_etc_hosts() {
+    hostname=$(cat /etc/hostname)
+
+    if grep -Eq "^127\.0\.1\.1\s+$hostname" /etc/hosts; then
+        echo "INFO: hostname already present in /etc/hosts"
+        return
+    fi
+
+    if ! grep -Eq "^127\.0\.0\.1\s+localhost" /etc/hosts; then
+        echo "ERROR: couldn't find localhost in /etc/hosts"
+        exit 1
+    fi
+
+    echo "INFO: adding line '127.0.1.1 $hostname' to /etc/hosts"
+    sed -Ei "/^127\.0\.0\.1\s+localhost/a 127.0.1.1\t$hostname" /etc/hosts
+}
+
+configure_etc_hosts
 configure_sources_list
 configure_zsh
 configure_usergroups
