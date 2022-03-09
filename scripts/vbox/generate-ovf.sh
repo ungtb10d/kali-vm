@@ -14,7 +14,7 @@ vmdk_path=$1
 [ ${vmdk_path##*.} = vmdk ] || fail "Invalid input file '$vmdk_path'"
 
 description_template=scripts/templates/vm-description.txt
-ovf_template=script/templates/vbox.ovf
+ovf_template=scripts/templates/vbox.ovf
 
 
 # Prepare all the values
