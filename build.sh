@@ -93,7 +93,7 @@ if [ $TYPE = rootfs ]; then
         -t rootfs:$ROOTFS \
         rootfs.yaml
 elif [ -e $ROOTFS.tar.gz ]; then
-    echo "Re-using the existing rootfs $ROOTFS.tar.gz."
+    echo "Re-using the existing rootfs $(b $ROOTFS.tar.gz)."
     read -p "Ok? "
     debos $OPTS \
         -t arch:$ARCH \
