@@ -107,7 +107,7 @@ actions:
   - description: "Finish installation"
     action: run
     chroot: true
-    script: scripts/finish-install.sh {{ $user }}
+    script: scripts/finish-install.sh etc-hosts usergroups zsh
 
   - description: "Setup the disk image"
     action: image-partition
@@ -155,6 +155,11 @@ actions:
   {{ else if eq $type "generic" }}
     packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent, virtualbox-guest-x11 ]
   {{ end }}
+
+  - description: "Configure apt sources.list"
+    action: run
+    chroot: true
+    script: scripts/finish-install.sh apt-sources
 
   - description: "Final cleanup (from within)"
     action: run

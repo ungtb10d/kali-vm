@@ -59,6 +59,11 @@ actions:
     packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent, virtualbox-guest-x11 ]
   {{ end }}
 
+  - description: "Configure apt sources.list"
+    action: run
+    chroot: true
+    script: scripts/finish-install.sh apt-sources
+
   - description: "Final cleanup (from within)"
     action: run
     chroot: true

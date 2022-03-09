@@ -1,10 +1,12 @@
 #!/bin/sh
 
-# XXX mostly taken from live-build-config, with some modifications
+# Most of these functions were taken from kali-finish-install in the git repo
+# live-build-config, with some minor modifications.
 
 set -e
 
-configure_sources_list() {
+configure_apt_sources_list() {
+    # make sources.list empty, to force setting defaults
     echo > /etc/apt/sources.list
 
     if grep -q '^deb ' /etc/apt/sources.list; then
@@ -84,7 +86,13 @@ configure_etc_hosts() {
     sed -Ei "/^127\.0\.0\.1\s+localhost/a 127.0.1.1\t$hostname" /etc/hosts
 }
 
-configure_etc_hosts
-configure_sources_list
-configure_zsh
-configure_usergroups
+while [ $# -ge 1 ]; do
+    case $1 in
+        apt-sources) configure_apt_sources_list ;;
+        etc-hosts)   configure_etc_hosts ;;
+        usergroups)  configure_usergroups ;;
+        zsh)         configure_zsh ;;
+        *) echo "ERROR: Unsupported argument '$1'"; exit 1 ;;
+    esac
+    shift
+done
