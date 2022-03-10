@@ -108,7 +108,7 @@ actions:
 
   - description: "Setup the disk image"
     action: image-partition
-    imagename: {{ $imagename }}.img
+    imagename: {{ $imagename }}.raw
     imagesize: {{ $size }}
     partitiontype: msdos
     partitions:
@@ -172,12 +172,12 @@ actions:
   - description: "Generate {{ $imagename }}.qcow2"
     action: run
     postprocess: true
-    command: qemu-img convert -O qcow2 {{ $imagename }}.img {{ $imagename }}.qcow2
+    command: qemu-img convert -O qcow2 {{ $imagename }}.raw {{ $imagename }}.qcow2
   {{ else if eq $type "virtualbox" }}
   - description: "Generate {{ $imagename }}.vmdk"
     action: run
     postprocess: true
-    command: qemu-img convert -O vmdk -o subformat=streamOptimized {{ $imagename }}.img {{ $imagename }}.vmdk
+    command: qemu-img convert -O vmdk -o subformat=streamOptimized {{ $imagename }}.raw {{ $imagename }}.vmdk
 
   - description: "Generate {{ $imagename }}.ovf"
     action: run
@@ -200,15 +200,15 @@ actions:
     command: |
       rm -fr {{ $imagename }}.vmware
       mkdir {{ $imagename }}.vmware
-      qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse {{ $imagename }}.img {{ $imagename }}.vmware/{{ $imagename }}.vmdk
+      qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse {{ $imagename }}.raw {{ $imagename }}.vmware/{{ $imagename }}.vmdk
 
   - description: "Generate {{ $imagename }}.vmx"
     action: run
     postprocess: true
     script: scripts/vmware/generate-vmx.sh {{ $imagename }}.vmware/{{ $imagename }}.vmdk
   {{ else if eq $type "generic" }}
-  - description: "Rename to {{ $imagename }}.raw"
+  - description: "Rename to {{ $imagename }}.img"
     action: run
     postprocess: true
-    command: mv -v {{ $imagename }}.img {{ $imagename }}.raw
+    command: mv -v {{ $imagename }}.raw {{ $imagename }}.img
   {{ end }}
