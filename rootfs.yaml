@@ -24,13 +24,10 @@ actions:
     chroot: true
     script: scripts/preseed.sh
 
-  # Mimic tasksel definition of 'standard packages' by excluding libraries.
-  # Additionally, remove standard packages that are not installed in current
-  # Kali images, for whatever unclear reasons.
   - description: "Install standard packages"
     action: run
     chroot: true
-    command: apt-get install -y '?priority(standard) !?section(lib) !(~napt-listchanges|~ndebian-faq|~ndoc-debian|~npython3-reportbug|~nreportbug|~nwamerican)'
+    script: scripts/install-standard-packages.sh
 
   - description: "Set default locale {{ $locale }}"
     action: run
