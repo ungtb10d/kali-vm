@@ -6,7 +6,11 @@ SUPPORTED_ARCHITECTURES="amd64 arm64"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
 SUPPORTED_TYPES="generic qemu rootfs virtualbox vmware"
-DEFAULT_HTTP_PROXY=http://10.0.2.2:3142
+
+WELL_KNOWN_PROXIES="\
+3142 apt-cacher-ng
+8000 squid-deb-proxy
+9999 approx"
 
 ARCH=amd64
 BRANCH=kali-last-snapshot
@@ -68,12 +72,20 @@ echo "Use the $(b $BRANCH) branch, install the $(b $DESKTOP) desktop environment
 echo "Build the image using the mirror $(b $MIRROR)."
 read -p "Ok? "
 
+# Attempt to detect well-known http caching proxies on localhost,
+# cf. bash(1) section "REDIRECTION". This is not bullet-proof.
 if ! [ -v http_proxy ]; then
-    echo "The http_proxy environment variable is not set."
-    echo "Using this proxy then: $(b $DEFAULT_HTTP_PROXY)."
-    read -p "Ok? "
-    export http_proxy=$DEFAULT_HTTP_PROXY
+    while read port proxy; do
+        (</dev/tcp/localhost/$port) 2>/dev/null || continue
+        echo "Detected proxy $(b $proxy) on port $(b $port)."
+        export http_proxy="http://10.0.2.2:$port"
+        break
+    done <<< "$WELL_KNOWN_PROXIES"
 fi
+[ "${http_proxy:-}" ] \
+    && echo "Using the proxy: $(b http_proxy=$http_proxy)." \
+    || echo "No http proxy, all packages will be downloaded from Internet."
+read -p "Ok? "
 
 # XXX Size required shouldn't change, but user should be allowed to decide
 # whether they want to use RAM or DISK . Default should be disk, while RAM
