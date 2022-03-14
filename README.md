@@ -27,20 +27,22 @@ Then build a default image with:
 
 ### Types of build
 
-* `generic`: Build a *raw* disk image. All the virt packages are installed.
+Different types of images can be built using the option `-t`:
+
+* `generic`: Build a *raw* disk image, install all virt support packages.
 * `qemu`: Build a *qcow2* image, install virt support for QEMU.
 * `virtualbox`: Build a *ova* image, install virt support for VirtualBox.
 * `vmware`: Build a *vmdk* image, install virt support for VMware.
 * `rootfs`: only build and pack the rootfs as a `.tar.gz`. Doesn't contain the
-  kernel and bootloader. The main use-case is use it as input to build a disk
-  image.
+  kernel and bootloader. The main use-case is to reuse it as input to build a
+  disk image.
 
-### Image configuration
+### Image configuration (not exposed by build.sh yet)
 
 * `locale` pick a value in 1st column of `/usr/share/i18n/SUPPORTED`
 * `timezone` of the form `<dir>/<dir>` taken from `/usr/share/zoneinfo`
 
-### Caching proxy
+### Caching proxy configuration
 
 When building OS images, it's useful to have a caching mechanism in place, to
 avoid having to download all the packages from Internet, again and again. To
@@ -64,5 +66,5 @@ more details.
 
 ## Known limitations
 
-* No support for vmware images yet.
-* Only `amd64` build is supported for now.
+* Only `amd64` build is supported for now (nothing else was tested).
+* VMware build is not ready yet.

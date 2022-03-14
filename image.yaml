@@ -79,6 +79,7 @@ actions:
     action: run
     postprocess: true
     command: qemu-img convert -O qcow2 {{ $imagename }}.raw {{ $imagename }}.qcow2
+
   {{ else if eq $type "virtualbox" }}
   - description: "Generate {{ $imagename }}.vmdk"
     action: run
@@ -94,6 +95,7 @@ actions:
     action: run
     postprocess: true
     script: scripts/vbox/generate-ova.sh {{ $imagename }}.ovf {{ $imagename }}.vmdk
+
   {{ else if eq $type "vmware" }}
   - description: "Finish install for {{ $type }}"
     action: run
@@ -104,14 +106,14 @@ actions:
     action: run
     postprocess: true
     command: |
-      rm -fr {{ $imagename }}.vmware
-      mkdir {{ $imagename }}.vmware
+      rm -fr {{ $imagename }}.vmware && mkdir {{ $imagename }}.vmware
       qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse {{ $imagename }}.raw {{ $imagename }}.vmware/{{ $imagename }}.vmdk
 
   - description: "Generate {{ $imagename }}.vmx"
     action: run
     postprocess: true
     script: scripts/vmware/generate-vmx.sh {{ $imagename }}.vmware/{{ $imagename }}.vmdk
+
   {{ else if eq $type "generic" }}
   - description: "Rename to {{ $imagename }}.img"
     action: run
