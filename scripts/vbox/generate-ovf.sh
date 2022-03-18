@@ -106,7 +106,7 @@ sed \
     -e "s|%VirtualSystemIdentifier%|$name|g" \
     $ovf_template > $output
 
-awk -v r="$description" '{gsub(/%Description%/,r)}1' $output > $output.1
+awk -v r="$description" '{ gsub(/%Description%/,r); print }' $output > $output.1
 mv $output.1 $output
 
 unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output || :)
