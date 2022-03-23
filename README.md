@@ -2,28 +2,29 @@
 
 Recipes to build Kali Linux VM images.
 
-
-
 ## Prerequisites
 
 The images are built using the OS image builder named [debos][].
 
 Let's install it via APT:
 
-    sudo apt install debos
-
-[debos]: https://github.com/go-debos/debos
-
+```
+sudo apt install debos
+```
 
 ## Build an image
 
 The script `build.sh` is a wrapper on top of debos. Get started with:
 
-    ./build.sh -h
+```
+./build.sh -h
+```
 
 Then build a default image with:
 
-    ./build.sh
+```
+./build.sh
+```
 
 ### Types of build
 
@@ -62,9 +63,9 @@ used, `export http_proxy=`.
 Also refer to <https://github.com/go-debos/debos#environment-variables> for
 more details.
 
-
-
 ## Known limitations
 
 * Only `amd64` build is supported for now (nothing else was tested).
 * VMware build is not ready yet.
+
+[debos]: https://github.com/go-debos/debos
