@@ -1,6 +1,6 @@
 # Kali VM Image Builder
 
-Recipes to build Kali Linux VM images.
+Recipes to build Kali Linux Virtual Machine (VM) images.
 
 ## Prerequisites
 
@@ -10,6 +10,14 @@ Let's install it via APT:
 
 ```
 sudo apt install debos
+```
+
+Make sure that the Git repo is cloned locally:
+
+```
+sudo apt install git
+git clone https://gitlab.com/kalilinux/build-scripts/kali-vm.git
+cd kali-vm/
 ```
 
 ## Build an image
