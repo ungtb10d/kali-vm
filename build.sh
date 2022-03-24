@@ -45,7 +45,7 @@ while getopts ':a:b:d:hm:s:t:v:' opt; do
         (b) BRANCH=$OPTARG ;;
         (d) DESKTOP=$OPTARG ;;
         (h) echo "$USAGE" && exit 0 ;;
-        (m) MIRRROR=$OPTARG ;;
+        (m) MIRROR=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
         (t) TYPE=$OPTARG ;;
         (v) VERSION=$OPTARG ;;
