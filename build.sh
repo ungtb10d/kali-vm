@@ -25,18 +25,34 @@ b() { tput bold; echo -n "$@"; tput sgr0; }
 
 [ $(id -u) -eq 0 ] && fail "No need to be root. Please run as normal user."
 
-USAGE="Usage: $(basename $0) [-a ARCH] [-b BRANCH] [-d DESKTOP] [-m MIRROR] [-s SIZE] [-t TYPE] [-v VERSION]
+USAGE="Usage: $(basename $0) [<option>...]
 
 Build a Kali Linux OS image.
-By default, build a $(b $ARCH $TYPE) image of size $(b $SIZE),
-use the branch $(b $BRANCH) and the mirror $(b $MIRROR).
-Install the $(b $DESKTOP) desktop environment.
 
-Supported values for options:
-* architectures: $SUPPORTED_ARCHITECTURES
-* branches ... : $SUPPORTED_BRANCHES
-* desktops ... : $SUPPORTED_DESKTOPS
-* types ...... : $SUPPORTED_TYPES
+Options:
+  -a ARCH     Build an image for this architecture, default: $ARCH
+  -b BRANCH   Kali branch used to build the image, default: $BRANCH
+  -d DESKTOP  Desktop environment installed in the image, default: $DESKTOP
+  -m MIRROR   Mirror used to build the image, default: $MIRROR
+  -s SIZE     Size of the disk image created, default: $SIZE
+  -t TYPE     Type of image to build (see below for details), default: $TYPE
+  -v VERSION  xxx
+
+Supported values for some options:
+  ARCH        $SUPPORTED_ARCHITECTURES
+  BRANCH      $SUPPORTED_BRANCHES
+  DESKTOP     $SUPPORTED_DESKTOPS
+  TYPE        $SUPPORTED_TYPES
+
+The different types of images that can be built are:
+  generic     Build a $(b raw) disk image, install all virt support packages.
+  qemu        Build a $(b qcow2) image, install virt support for QEMU.
+  virtualbox  Build a $(b ova) image, install virt support for VirtualBox.
+  vmware      Build a $(b vmdk) image, install virt support for VMware.
+  rootfs      Only build and pack the rootfs as a $(b .tar.gz) archive. This is
+              not an OS image but just a compressed root filesystem. The kernel
+              and bootloader are not installed.  The main use-case is to reuse
+              it as input to build an OS image.
 "
 
 while getopts ':a:b:d:hm:s:t:v:' opt; do
