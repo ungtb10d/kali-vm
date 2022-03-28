@@ -138,7 +138,7 @@ if [ $TYPE = rootfs ]; then
         rootfs.yaml
 elif [ -e $ROOTFS.tar.gz ]; then
     echo "Re-using the existing rootfs $(b $ROOTFS.tar.gz)."
-    read -p "Ok? "
+    ask_confirmation || fail "Abort."
     debos $OPTS \
         -t arch:$ARCH \
         -t imagename:$IMAGE \
