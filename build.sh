@@ -16,7 +16,7 @@ ARCH=amd64
 BRANCH=kali-rolling
 DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
-SIZE=80GiB
+SIZE=80
 TYPE=generic
 VERSION=
 
@@ -45,7 +45,7 @@ Options:
   -b BRANCH   Kali branch used to build the image, default: $BRANCH
   -d DESKTOP  Desktop environment installed in the image, default: $DESKTOP
   -m MIRROR   Mirror used to build the image, default: $MIRROR
-  -s SIZE     Size of the disk image created, default: $SIZE
+  -s SIZE     Size of the disk image created in GiB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
   -v VERSION  Release version of Kali, defaults: ${BRANCH#kali-}
 
@@ -89,6 +89,8 @@ echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
 echo $SUPPORTED_TYPES | grep -qw $TYPE \
     || fail "Unsupported type '$TYPE'"
 
+[[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GiB \
+    || fail "Size must be given in GiB and must contain only digits"
 [ "$VERSION" ] || VERSION=${BRANCH#kali-}
 
 # Print a summary of the build options
