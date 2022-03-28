@@ -60,6 +60,9 @@ The different types of images that can be built are:
   qemu        Build a $(b qcow2) image, install virtualization support for QEMU.
   virtualbox  Build a $(b ova) image, install virtualization support for VirtualBox.
   rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
+
+Supported environment variables:
+  http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
 while getopts ':a:b:d:hm:s:t:v:' opt; do
@@ -102,15 +105,15 @@ echo "Build the image using the mirror $(b $MIRROR)."
 if ! [ -v http_proxy ]; then
     while read port proxy; do
         (</dev/tcp/localhost/$port) 2>/dev/null || continue
-        echo "Detected proxy $(b $proxy) on port $(b $port)."
+        echo "Detected caching proxy $(b $proxy) on port $(b $port)."
         export http_proxy="http://10.0.2.2:$port"
         break
     done <<< "$WELL_KNOWN_PROXIES"
 fi
 if [ "${http_proxy:-}" ]; then
-    echo "Using the proxy: $(b http_proxy=$http_proxy)."
+    echo "Using a proxy via env variable: $(b http_proxy=$http_proxy)."
 else
-    echo "No http proxy, all packages will be downloaded from Internet."
+    echo "No http proxy configured, all packages will be downloaded from Internet."
 fi
 
 # Ask for confirmation before starting the build
