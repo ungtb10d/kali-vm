@@ -126,7 +126,7 @@ ask_confirmation || fail "Abort."
 # shouldn't be allowed if not enough free RAM.
 
 #OPTS="-m 8G"
-OPTS="--scratchsize=14G"
+OPTS="--scratchsize=16G"
 ROOTFS=rootfs-$ARCH
 IMAGE=kali-linux-$VERSION-$TYPE-$ARCH
 
