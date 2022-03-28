@@ -82,7 +82,7 @@ done
 shift $((OPTIND - 1))
 
 echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
-    || fail "Unsupported arch '$ARCH'"
+    || fail "Unsupported architecture '$ARCH'"
 echo $SUPPORTED_BRANCHES | grep -qw $BRANCH \
     || fail "Unsupported branch '$BRANCH'"
 echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
@@ -109,16 +109,18 @@ if ! [ -v http_proxy ]; then
         break
     done <<< "$WELL_KNOWN_PROXIES"
 fi
-[ "${http_proxy:-}" ] \
-    && echo "Using the proxy: $(b http_proxy=$http_proxy)." \
-    || echo "No http proxy, all packages will be downloaded from Internet."
+if [ "${http_proxy:-}" ]; then
+    echo "Using the proxy: $(b http_proxy=$http_proxy)."
+else
+    echo "No http proxy, all packages will be downloaded from Internet."
+fi
 
 # Ask for confirmation before starting the build
 ask_confirmation || fail "Abort."
 
 # XXX Size required shouldn't change, but user should be allowed to decide
 # whether they want to use RAM or DISK . Default should be disk, while RAM
-# should't be allowed if not enough free RAM.
+# shouldn't be allowed if not enough free RAM.
 
 #OPTS="-m 8G"
 OPTS="--scratchsize=14G"
