@@ -47,7 +47,7 @@ Options:
   -m MIRROR   Mirror used to build the image, default: $MIRROR
   -s SIZE     Size of the disk image created, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
-  -v VERSION  Release version of Kali, defaults: ${BRANCH:#kali-}
+  -v VERSION  Release version of Kali, defaults: ${BRANCH#kali-}
 
 Supported values for some options:
   ARCH        $SUPPORTED_ARCHITECTURES
