@@ -18,7 +18,7 @@ DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
 SIZE=80GiB
 TYPE=generic
-VERSION=localbuild
+VERSION=
 
 fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
@@ -47,7 +47,7 @@ Options:
   -m MIRROR   Mirror used to build the image, default: $MIRROR
   -s SIZE     Size of the disk image created, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
-  -v VERSION  xxx
+  -v VERSION  Release version of Kali, defaults: ${BRANCH:#kali-}
 
 Supported values for some options:
   ARCH        $SUPPORTED_ARCHITECTURES
@@ -86,6 +86,8 @@ echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
     || fail "Unsupported desktop '$DESKTOP'"
 echo $SUPPORTED_TYPES | grep -qw $TYPE \
     || fail "Unsupported type '$TYPE'"
+
+[ "$VERSION" ] || VERSION=${BRANCH#kali-}
 
 # Print a summary of the build options
 if [ $TYPE = rootfs ]; then
