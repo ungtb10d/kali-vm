@@ -56,10 +56,10 @@ Supported values for some options:
   TYPE        $SUPPORTED_TYPES
 
 The different types of images that can be built are:
-  generic     Build a $(b raw) disk image, install all virt support packages.
-  qemu        Build a $(b qcow2) image, install virt support for QEMU.
-  virtualbox  Build a $(b ova) image, install virt support for VirtualBox.
-  vmware      Build a $(b vmdk) image, install virt support for VMware.
+  generic     Build a $(b raw) disk image, install all virtualization support packages.
+  qemu        Build a $(b qcow2) image, install virtualization support for QEMU.
+  virtualbox  Build a $(b ova) image, install virtualization support for VirtualBox.
+  vmware      Build a $(b vmdk) image, install virtualization support for VMware.
   rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
 "
 
