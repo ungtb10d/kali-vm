@@ -2,10 +2,10 @@
 
 set -eu
 
-SUPPORTED_ARCHITECTURES="amd64 arm64"
+SUPPORTED_ARCHITECTURES="amd64"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
-SUPPORTED_TYPES="generic qemu rootfs virtualbox vmware"
+SUPPORTED_TYPES="generic qemu rootfs virtualbox"
 
 WELL_KNOWN_PROXIES="\
 3142 apt-cacher-ng
@@ -59,7 +59,6 @@ The different types of images that can be built are:
   generic     Build a $(b raw) disk image, install all virtualization support packages.
   qemu        Build a $(b qcow2) image, install virtualization support for QEMU.
   virtualbox  Build a $(b ova) image, install virtualization support for VirtualBox.
-  vmware      Build a $(b vmdk) image, install virtualization support for VMware.
   rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
 "
 

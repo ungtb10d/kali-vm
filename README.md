@@ -32,7 +32,6 @@ Different types of images can be built using the option `-t`:
 * `generic`: Build a *raw* disk image, install all virt support packages.
 * `qemu`: Build a *qcow2* image, install virt support for QEMU.
 * `virtualbox`: Build a *ova* image, install virt support for VirtualBox.
-* `vmware`: Build a *vmdk* image, install virt support for VMware.
 * `rootfs`: Only build and pack the rootfs as a `.tar.gz`. This is not an OS
   image but just a compressed root filesystem. The kernel and bootloader are
   not installed. The main use-case is to reuse it as input to build an OS
