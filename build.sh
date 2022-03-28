@@ -60,10 +60,7 @@ The different types of images that can be built are:
   qemu        Build a $(b qcow2) image, install virt support for QEMU.
   virtualbox  Build a $(b ova) image, install virt support for VirtualBox.
   vmware      Build a $(b vmdk) image, install virt support for VMware.
-  rootfs      Only build and pack the rootfs as a $(b .tar.gz) archive. This is
-              not an OS image but just a compressed root filesystem. The kernel
-              and bootloader are not installed.  The main use-case is to reuse
-              it as input to build an OS image.
+  rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
 "
 
 while getopts ':a:b:d:hm:s:t:v:' opt; do
