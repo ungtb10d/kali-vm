@@ -33,9 +33,10 @@ Different types of images can be built using the option `-t`:
 * `qemu`: Build a *qcow2* image, install virt support for QEMU.
 * `virtualbox`: Build a *ova* image, install virt support for VirtualBox.
 * `vmware`: Build a *vmdk* image, install virt support for VMware.
-* `rootfs`: only build and pack the rootfs as a `.tar.gz`. Doesn't contain the
-  kernel and bootloader. The main use-case is to reuse it as input to build a
-  disk image.
+* `rootfs`: Only build and pack the rootfs as a `.tar.gz`. This is not an OS
+  image but just a compressed root filesystem. The kernel and bootloader are
+  not installed. The main use-case is to reuse it as input to build an OS
+  image.
 
 ### Image configuration (not exposed by build.sh yet)
 
