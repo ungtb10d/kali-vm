@@ -23,6 +23,17 @@ VERSION=localbuild
 fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
 
+ask_confirmation() {
+    local question=${1:-"Do you want to continue?"}
+    local answer=
+    read -r -p "$question [Y/n] " answer
+    [ "$answer" ] && answer=${answer,,} || answer=y
+    case "$answer" in
+        (y|yes) return 0 ;;
+        (*)     return 1 ;;
+    esac
+}
+
 [ $(id -u) -eq 0 ] && fail "No need to be root. Please run as normal user."
 
 USAGE="Usage: $(basename $0) [<option>...]
@@ -79,6 +90,7 @@ echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
 echo $SUPPORTED_TYPES | grep -qw $TYPE \
     || fail "Unsupported type '$TYPE'"
 
+# Print a summary of the build options
 if [ $TYPE = rootfs ]; then
     echo "Build a Kali $(b $TYPE) for the $(b $ARCH) architecture."
 else
@@ -86,7 +98,6 @@ else
 fi
 echo "Use the $(b $BRANCH) branch, install the $(b $DESKTOP) desktop environment."
 echo "Build the image using the mirror $(b $MIRROR)."
-read -p "Ok? "
 
 # Attempt to detect well-known http caching proxies on localhost,
 # cf. bash(1) section "REDIRECTION". This is not bullet-proof.
@@ -101,7 +112,9 @@ fi
 [ "${http_proxy:-}" ] \
     && echo "Using the proxy: $(b http_proxy=$http_proxy)." \
     || echo "No http proxy, all packages will be downloaded from Internet."
-read -p "Ok? "
+
+# Ask for confirmation before starting the build
+ask_confirmation || fail "Abort."
 
 # XXX Size required shouldn't change, but user should be allowed to decide
 # whether they want to use RAM or DISK . Default should be disk, while RAM
