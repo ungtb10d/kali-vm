@@ -13,7 +13,7 @@ WELL_KNOWN_PROXIES="\
 9999 approx"
 
 ARCH=amd64
-BRANCH=kali-last-snapshot
+BRANCH=kali-rolling
 DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
 SIZE=80GiB
