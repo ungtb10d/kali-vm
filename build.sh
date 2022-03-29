@@ -140,9 +140,16 @@ if [ $TYPE = rootfs ]; then
         -t mirror:$MIRROR \
         -t rootfs:$ROOTFS \
         rootfs.yaml
-elif [ -e $ROOTFS.tar.gz ]; then
-    echo "Re-using the existing rootfs $(b $ROOTFS.tar.gz)."
-    ask_confirmation || fail "Abort."
+    exit 0
+fi
+
+REUSE_ROOTFS=0
+if [ -e $ROOTFS.tar.gz ]; then
+    ask_confirmation "Build image using existing rootfs $(b $ROOTFS.tar.gz)?" \
+        && REUSE_ROOTFS=1
+fi
+
+if [ $REUSE_ROOTFS -eq 1 ]; then
     debos $OPTS \
         -t arch:$ARCH \
         -t imagename:$IMAGE \
