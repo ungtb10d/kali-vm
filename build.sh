@@ -125,10 +125,12 @@ ask_confirmation || fail "Abort."
 # whether they want to use RAM or DISK . Default should be disk, while RAM
 # shouldn't be allowed if not enough free RAM.
 
+mkdir -p images
+
 #OPTS="-m 8G"
 OPTS="--scratchsize=16G"
-ROOTFS=rootfs-$ARCH
-IMAGE=kali-linux-$VERSION-$TYPE-$ARCH
+ROOTFS=images/rootfs-$ARCH
+IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
 
 if [ $TYPE = rootfs ]; then
     debos $OPTS \
