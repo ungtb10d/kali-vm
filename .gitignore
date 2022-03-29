@@ -1,17 +1,1 @@
-/*.raw
-/*.tar.gz
-
-# qemu
-/*.img
-/*.qcow2
-
-# edk2
-/*.aavmf
-/*.ovmf
-
-# virtual box
-/*.mf
-/*.ova
-/*.ovf
-/*.vmdk
-/*.vmware
+/images/
