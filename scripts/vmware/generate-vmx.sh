@@ -23,8 +23,11 @@ vmdk=$(basename $vmdk_path)
 name=${vmdk%.*}
 nvram=${name}.nvram
 vmxf=${name}.vmxf
+
 arch=${name##*-}
-version=$(echo $name | cut -d- -f3)
+[ "$arch" ] || fail "Failed to get arch from image name '$name'"
+version=$(echo $name | sed -E 's/^kali-linux-(.+)-.+-.+$/\1/')
+[ "$version" ] || fail "Failed to get version from image name '$name'"
 
 # https://kb.vmware.com/s/article/1010806
 vmci_id=$(od -vAn -N4 -tu4 < /dev/urandom)

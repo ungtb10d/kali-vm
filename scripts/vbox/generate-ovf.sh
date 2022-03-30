@@ -21,8 +21,11 @@ ovf_template=scripts/templates/vbox.ovf
 
 vmdk=$(basename $vmdk_path)
 name=${vmdk%.*}
+
 arch=${name##*-}
-version=$(echo $name | cut -d- -f3)
+[ "$arch" ] || fail "Failed to get arch from image name '$name'"
+version=$(echo $name | sed -E 's/^kali-linux-(.+)-.+-.+$/\1/')
+[ "$version" ] || fail "Failed to get version from image name '$name'"
 
 size=$(qemu-img info $vmdk_path | sed -E -n "s/^virtual size: .* GiB \(([0-9]+) bytes\)/\1/p")
 
