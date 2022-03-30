@@ -81,6 +81,28 @@ actions:
     command: qemu-img convert -O qcow2 {{ $imagename }}.raw {{ $imagename }}.qcow2
 
   {{ else if eq $type "virtualbox" }}
+  - description: "Generate {{ $imagename }}.vdi"
+    action: run
+    postprocess: true
+    command: qemu-img convert -O vdi {{ $imagename }}.raw {{ $imagename }}.vdi
+
+  - description: "Generate {{ $imagename }}.vbox"
+    action: run
+    postprocess: true
+    script: scripts/vbox/generate-vbox.sh {{ $imagename }}.vdi
+
+  - description: "Pack with 7zip"
+    action: run
+    postprocess: true
+    label: 7zip
+    command: |
+      cd $(dirname {{ $imagename }})
+      image=$(basename {{ $imagename }})
+      mkdir $image
+      mv $image.vdi $image.vbox $image
+      7z a -sdel -mx=9 $image.7z $image
+
+  {{ else if eq $type "virtualbox-ova" }}
   - description: "Generate {{ $imagename }}.vmdk"
     action: run
     postprocess: true
