@@ -19,6 +19,7 @@ MIRROR=http://http.kali.org/kali
 SIZE=80
 TYPE=generic
 VERSION=
+ZIP=false
 
 fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
@@ -48,6 +49,7 @@ Options:
   -s SIZE     Size of the disk image created in GB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
   -v VERSION  Release version of Kali, defaults: ${BRANCH#kali-}
+  -z          Zip images and metadata files after the build.
 
 Supported values for some options:
   ARCH        $SUPPORTED_ARCHITECTURES
@@ -65,7 +67,7 @@ Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
-while getopts ':a:b:d:hm:s:t:v:' opt; do
+while getopts ":a:b:d:hm:s:t:v:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
@@ -75,6 +77,7 @@ while getopts ':a:b:d:hm:s:t:v:' opt; do
         (s) SIZE=$OPTARG ;;
         (t) TYPE=$OPTARG ;;
         (v) VERSION=$OPTARG ;;
+        (z) ZIP=true ;;
         (*) fail "$USAGE" ;;
     esac
 done
@@ -156,6 +159,7 @@ if [ $REUSE_ROOTFS -eq 1 ]; then
         -t rootfs:$ROOTFS \
         -t size:$SIZE \
         -t type:$TYPE \
+        -t zip:$ZIP \
         image.yaml
 else
     debos $OPTS \
@@ -166,5 +170,6 @@ else
         -t mirror:$MIRROR \
         -t size:$SIZE \
         -t type:$TYPE \
+        -t zip:$ZIP \
         full.yaml
 fi

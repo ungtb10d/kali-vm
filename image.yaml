@@ -3,6 +3,7 @@
 {{ $rootfs := .rootfs }}
 {{ $size := .size }}
 {{ $type := .type }}
+{{ $zip := .zip }}
 
 architecture: {{ $arch }}
 
@@ -91,7 +92,8 @@ actions:
     postprocess: true
     script: scripts/vbox/generate-vbox.sh {{ $imagename }}.vdi
 
-  - description: "Pack with 7zip"
+  {{ if eq $zip "true" }}
+  - description: "Compress with 7zip"
     action: run
     postprocess: true
     label: 7zip
@@ -101,6 +103,7 @@ actions:
       mkdir $image
       mv $image.vdi $image.vbox $image
       7z a -sdel -mx=9 $image.7z $image
+  {{ end }}
 
   {{ else if eq $type "virtualbox-ova" }}
   - description: "Generate {{ $imagename }}.vmdk"
