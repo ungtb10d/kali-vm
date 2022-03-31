@@ -1,35 +1,61 @@
-#!/bin/sh
+#!/bin/bash
 
 set -eu
 
 fail() { echo "$@" >&2; exit 1; }
 usage() { fail "Usage: $(basename $0) VMDK"; }
 
+get_vmdk_disk_uuid() {
+
+    # Get the UUID of a .vmdk disk
+    # (should propose this feature to 'qemu-img info')
+
+    local disk=$1
+    local magic=
+
+    magic=$(head -c4 $disk)
+    if [ "$magic" != KDMV ]; then
+        return
+    fi
+
+    dd skip=1 count=2 if=$disk 2>/dev/null \
+        | sed -n "s/^ddb\.uuid\.image=//p" | tr -d '"'
+}
+
+get_virtual_disk_size() {
+
+    # Get the size of a virtual disk. Tested with: .vmdk, .vdi.
+
+    local disk=$1
+
+    qemu-img info $disk \
+        | grep "^virtual size: " \
+        | sed -E "s/.* \(([0-9]+) bytes\)$/\1/"
+}
+
 # Validate arguments
 
 [ $# -eq 1 ] || usage
 
-vmdk_path=$1
+disk_path=$1
 
-[ ${vmdk_path##*.} = vmdk ] || fail "Invalid input file '$vmdk_path'"
+[ ${disk_path##*.} = vmdk ] || fail "Invalid input file '$disk_path'"
 
 description_template=scripts/templates/vm-description.txt
-ovf_template=scripts/templates/vbox.ovf
-
+ovf_template=scripts/templates/vm-definition.ovf
 
 # Prepare all the values
 
-vmdk=$(basename $vmdk_path)
-name=${vmdk%.*}
+disk_file=$(basename $disk_path)
+name=${disk_file%.*}
 
 arch=${name##*-}
 [ "$arch" ] || fail "Failed to get arch from image name '$name'"
 version=$(echo $name | sed -E 's/^kali-linux-(.+)-.+-.+$/\1/')
 [ "$version" ] || fail "Failed to get version from image name '$name'"
 
-size=$(qemu-img info $vmdk_path | sed -E -n "s/^virtual size: .* GiB \(([0-9]+) bytes\)/\1/p")
-
-disk_uuid=$(cat /proc/sys/kernel/random/uuid)
+disk_size=$(get_virtual_disk_size $disk_path)
+disk_uuid=$(get_vmdk_disk_uuid $disk_path)
 machine_uuid=$(cat /proc/sys/kernel/random/uuid)
 
 license="GPL v3 ~ https://www.kali.org/docs/policy/kali-linux-open-source-policy/"
@@ -62,21 +88,6 @@ case $arch in
         ;;
 esac
 
-# Override values for Kali 2021.3 amd64
-#size=85899345920
-#vmdk=Kali-Linux-2021.3-vbox-amd64-disk001.vmdk
-#name=Kali-Linux-2021.3-vbox-amd64
-#disk_uuid=700dc347-3774-4123-be9d-47c585f61781
-#machine_uuid=cf14878a-f9a0-47ce-8c7b-c0b95e2c2069
-
-# Override values for Kali 2021.3 i386
-#size=85899345920
-#vmdk=Kali-Linux-2021.3-vbox-i386-disk001.vmdk
-#name=Kali-Linux-2021.3-vbox-i386
-#disk_uuid=b75fc92d-4a0f-43c8-b3fa-7e44dc561220
-#machine_uuid=67890c86-5d34-4d71-b682-fa9e99099f8c
-
-
 # Create the description
 
 description=$(sed \
@@ -88,11 +99,11 @@ description=$(sed \
 
 # Create the .ovf file
 
-output=${vmdk_path%.*}.ovf
+output=${disk_path%.*}.ovf
 
 sed \
-    -e "s|%Capacity%|$size|g" \
-    -e "s|%DiskFile%|$vmdk|g" \
+    -e "s|%Capacity%|$disk_size|g" \
+    -e "s|%DiskFile%|$disk_file|g" \
     -e "s|%DiskUUID%|$disk_uuid|g" \
     -e "s|%License%|$license|g" \
     -e "s|%LongMode%|$long_mode|g" \
