@@ -17,6 +17,26 @@ actions:
     action: image-partition
     imagename: {{ $imagename }}.raw
     imagesize: {{ $size }}
+    {{ if eq $arch "arm64" }}
+    partitiontype: gpt
+    mountpoints:
+      - mountpoint: /
+        partition: root
+      - mountpoint: /boot/efi
+        partition: efi
+        flags: [ boot ]
+    partitions:
+      - name: efi
+        fs: vfat
+        start: 0%
+        end: 256MB
+        options: [ x-systemd.automount ]
+      - name: root
+        fs: ext4
+        start: 256MB
+        end: 100%
+        options: [ errors=remount-ro ]
+    {{ else }}
     partitiontype: msdos
     partitions:
       - name: root
@@ -28,6 +48,7 @@ actions:
       - mountpoint: /
         partition: root
         options: [ errors=remount-ro ]
+    {{ end }}
 
   - action: filesystem-deploy
     setup-kernel-cmdline: false
@@ -40,7 +61,13 @@ actions:
   - description: "Install the kernel & bootloader"
     action: apt
     recommends: true
-    packages: [ grub-pc, linux-image-generic ]
+    packages:
+    {{ if eq $arch "arm64" }}
+      - grub-efi
+    {{ else }}
+      - grub-pc
+    {{ end }}
+      - linux-image-generic
 
   - description: "Setup GRUB"
     action: run

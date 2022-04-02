@@ -37,6 +37,10 @@ case $arch in
         platform=x64
         guest_os=debian10-64
         ;;
+    arm64)
+        platform=arm64
+        guest_os=arm-debian11-64
+        ;;
     i386)
         platform=x86
         guest_os=debian10
@@ -64,6 +68,16 @@ vmdk=Kali-Linux-2021.4-vmware-i386.vmdk
 vmxf=Kali-Linux-2021.4-vmware-i386.vmxf
 uuid="56 4d ea 6a 11 a2 4c bc-1a f1 13 0d 6e b4 34 17"
 vmci_id=1857303575
+
+# Overrides for Kali 2021.4 arm64
+name=Kali-Linux-2021.4-vmware-arm64
+nvram=Kali-Linux-2021.4-vmware-arm64.nvram
+vmdk=Kali-Linux-2021.4-vmware-arm64.vmdk
+vmxf=Kali-Linux-2021.4-vmware-arm64.vmxf
+# TODO: These are copied from i386; we didn't do an arm64 2021.4 release
+uuid="56 4d ea 6a 11 a2 4c bc-1a f1 13 0d 6e b4 34 17"
+vmci_id=1857303575
+
 
 
 # Create the description

@@ -116,6 +116,26 @@ actions:
     action: image-partition
     imagename: {{ $imagename }}.raw
     imagesize: {{ $size }}
+    {{ if eq $arch "arm64" }}
+    partitiontype: gpt
+    mountpoints:
+      - mountpoint: /
+        partition: root
+      - mountpoint: /boot/efi
+        partition: efi
+        flags: [ boot ]
+    partitions:
+      - name: efi
+        fs: vfat
+        start: 0%
+        end: 256MB
+        options: [ x-systemd.automount ]
+      - name: root
+        fs: ext4
+        start: 256MB
+        end: 100%
+        options: [ errors=remount-ro ]
+    {{ else }}
     partitiontype: msdos
     partitions:
       - name: root
@@ -127,6 +147,7 @@ actions:
       - mountpoint: /
         partition: root
         options: [ errors=remount-ro ]
+    {{ end }}
 
   - action: filesystem-deploy
     setup-kernel-cmdline: false
@@ -139,7 +160,13 @@ actions:
   - description: "Install the kernel & bootloader"
     action: apt
     recommends: true
-    packages: [ grub-pc, linux-image-generic ]
+    packages:
+    {{ if eq $arch "arm64" }}
+       - grub-efi
+    {{ else }}
+       - grub-pc
+    {{ end }}
+       - linux-image-generic
 
   - description: "Setup GRUB"
     action: run
@@ -151,12 +178,17 @@ actions:
     recommends: true
   {{ if eq $type "qemu" }}
     packages: [ qemu-guest-agent, spice-vdagent ]
+  {{ if ne $arch "arm64" }}
   {{ else if eq $type "virtualbox" }}
     packages: [ virtualbox-guest-x11 ]
+  {{ end }}
   {{ else if eq $type "vmware" }}
     packages: [ open-vm-tools-desktop ]
   {{ else if eq $type "generic" }}
-    packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent, virtualbox-guest-x11 ]
+    packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent ]
+  {{ if ne $arch "arm64" }}
+      - virtualbox-guest-x11
+  {{ end }}
   {{ end }}
 
   - description: "Configure apt sources.list"

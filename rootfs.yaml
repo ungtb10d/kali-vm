@@ -74,7 +74,9 @@ actions:
       #- kali-linux-core
       #- kali-desktop-core
       #- kali-desktop-{{ $desktop }}
+      {{ if ne $desktop "none" }}
       - kali-desktop-{{ $desktop }}
+      {{ end }}
       - kali-linux-core
       - kali-linux-default
       - kali-tools-top10
