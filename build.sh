@@ -27,8 +27,9 @@ b() { tput bold; echo -n "$@"; tput sgr0; }
 ask_confirmation() {
     local question=${1:-"Do you want to continue?"}
     local answer=
+    local default=yes
     read -r -p "$question [Y/n] " answer
-    [ "$answer" ] && answer=${answer,,} || answer=y
+    [ "$answer" ] && answer=${answer,,} || answer=$default
     case "$answer" in
         (y|yes) return 0 ;;
         (*)     return 1 ;;
