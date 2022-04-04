@@ -28,7 +28,16 @@ ask_confirmation() {
     local question=${1:-"Do you want to continue?"}
     local answer=
     local default=yes
-    read -r -p "$question [Y/n] " answer
+    local timeout=10
+    local ret=0
+
+    read -r -t $timeout -p "$question [Y/n] " answer || ret=$?
+    if [ $ret -gt 128 ]; then
+        echo "No answer, assuming $default."
+        answer=$default
+        ret=0
+    fi
+    [ $ret -eq 0 ] || exit $ret
     [ "$answer" ] && answer=${answer,,} || answer=$default
     case "$answer" in
         (y|yes) return 0 ;;
