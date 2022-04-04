@@ -204,7 +204,7 @@ actions:
       7z a -sdel -mx=9 $image.7z $image
   {{ end }}
 
-  {{ else if eq $type "virtualbox-ova" }}
+  {{ else if eq $type "generic" }}
   - description: "Generate {{ $imagename }}.vmdk"
     action: run
     postprocess: true
@@ -238,7 +238,7 @@ actions:
     postprocess: true
     script: scripts/vmware/generate-vmx.sh {{ $imagename }}.vmware/{{ $imagename }}.vmdk
 
-  {{ else if eq $type "generic" }}
+  {{ else if eq $type "raw" }}
   - description: "Rename to {{ $imagename }}.img"
     action: run
     postprocess: true

@@ -81,9 +81,9 @@ Supported values for some options:
   TYPE        $SUPPORTED_TYPES
 
 The different types of images that can be built are:
-  generic     Build a $(b raw) disk image, install all virtualization support packages.
-  qemu        Build a $(b qcow2) image, install virtualization support for QEMU.
-  virtualbox  Build a $(b ova) image, install virtualization support for VirtualBox.
+  generic     Build a $(b sparse VMDK) disk image and a $(b OVF) metadata file.
+  qemu        Build a $(b QCOW2) image.
+  virtualbox  Build a $(b VDI) disk image and a $(b .vbox) metadata file.
   rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
 
 Supported environment variables:

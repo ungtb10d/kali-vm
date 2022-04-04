@@ -105,11 +105,11 @@ actions:
       7z a -sdel -mx=9 $image.7z $image
   {{ end }}
 
-  {{ else if eq $type "virtualbox-ova" }}
+  {{ else if eq $type "generic" }}
   - description: "Generate {{ $imagename }}.vmdk"
     action: run
     postprocess: true
-    command: qemu-img convert -O vmdk -o subformat=streamOptimized {{ $imagename }}.raw {{ $imagename }}.vmdk
+    command: qemu-img convert -O vmdk {{ $imagename }}.raw {{ $imagename }}.vmdk
 
   - description: "Generate {{ $imagename }}.ovf"
     action: run
@@ -120,6 +120,17 @@ actions:
     action: run
     postprocess: true
     script: scripts/vbox/generate-ova.sh {{ $imagename }}.ovf {{ $imagename }}.vmdk
+
+  {{ if eq $zip "true" }}
+  - description: "Compress with 7zip"
+    action: run
+    postprocess: true
+    label: 7zip
+    command: |
+      cd $(dirname {{ $imagename }})
+      image=$(basename {{ $imagename }})
+      7z a -sdel -mx=9 $image.7z $image.ova
+  {{ end }}
 
   {{ else if eq $type "vmware" }}
   - description: "Finish install for {{ $type }}"
@@ -139,7 +150,7 @@ actions:
     postprocess: true
     script: scripts/vmware/generate-vmx.sh {{ $imagename }}.vmware/{{ $imagename }}.vmdk
 
-  {{ else if eq $type "generic" }}
+  {{ else if eq $type "raw" }}
   - description: "Rename to {{ $imagename }}.img"
     action: run
     postprocess: true
