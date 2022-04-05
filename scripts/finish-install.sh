@@ -2,6 +2,8 @@
 
 # Most of these functions were taken from kali-finish-install in the git repo
 # live-build-config, with some minor modifications.
+#
+# This script MUST be idempotent.
 
 set -e
 
