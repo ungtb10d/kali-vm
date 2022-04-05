@@ -24,7 +24,7 @@ actions:
         partition: root
       - mountpoint: /boot/efi
         partition: efi
-        flags: [ boot ]
+        flags: [ esp ]
     partitions:
       - name: efi
         fs: vfat
