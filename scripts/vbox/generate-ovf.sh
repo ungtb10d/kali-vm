@@ -55,7 +55,9 @@ version=$(echo $name | sed -E 's/^kali-linux-(.+)-.+-.+$/\1/')
 [ "$version" ] || fail "Failed to get version from image name '$name'"
 
 disk_size=$(get_virtual_disk_size $disk_path)
+# AFAIK the disk uuid is not set by qemu-img, in such case we generate something random
 disk_uuid=$(get_vmdk_disk_uuid $disk_path)
+[ "$disk_uuid" ] || disk_uuid=$(cat /proc/sys/kernel/random/uuid)
 machine_uuid=$(cat /proc/sys/kernel/random/uuid)
 
 license="GPL v3 ~ https://www.kali.org/docs/policy/kali-linux-open-source-policy/"
