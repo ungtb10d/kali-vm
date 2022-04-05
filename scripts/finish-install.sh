@@ -29,7 +29,7 @@ END
 get_user_list() {
     for user in $(cd /home && ls); do
         if ! getent passwd "$user" >/dev/null; then
-            echo "WARNING: user '$user' is invalid but /home/$user exists"
+            echo "WARNING: user '$user' is invalid but /home/$user exists" >&2
             continue
         fi
         echo "$user"
@@ -53,6 +53,7 @@ configure_zsh() {
 }
 
 configure_usergroups() {
+    # Ensure those groups exist
     addgroup --system kaboxer || true
     addgroup --system wireshark || true
 
@@ -60,12 +61,16 @@ configure_usergroups() {
     # dialout - for serial access
     # kaboxer - for kaboxer
     # sudo - be root
+    # vboxsf - shared folders for virtualbox guest
     # wireshark - capture sessions in wireshark
-    kali_groups="adm,dialout,kaboxer,sudo,wireshark"
+    kali_groups="adm dialout kaboxer sudo vboxsf wireshark"
 
     for user in $(get_user_list | grep -xv root); do
         echo "INFO: adding user '$user' to groups '$kali_groups'"
-        usermod -a -G "$kali_groups" $user || true
+	for grp in $kali_groups; do
+	    getent group $grp >/dev/null || continue
+	    usermod -a -G $grp $user
+	done
     done
 }
 
