@@ -32,6 +32,13 @@ EOF
 # second or last. For more details, refer to the OVF specification:
 # https://www.dmtf.org/sites/default/files/standards/documents/DSP0243_1.1.0.pdf
 
+# Enter workdir, assume all the files are in the same directory.
+
+cd $(dirname $ovf)
+ovf=$(basename $ovf)
+vmdk=$(basename $vmdk)
+mf=$(basename $mf)
+
 ova=${ovf%.*}.ova
 
 tar -cvf $ova $ovf $vmdk $mf
