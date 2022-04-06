@@ -11,7 +11,7 @@ actions:
   - description: "Unpack {{ $rootfs }}"
     action: unpack
     compression: gz
-    file: {{ $rootfs }}.tar.gz
+    file: {{ $rootfs }}
 
   - description: "Setup the disk image"
     action: image-partition

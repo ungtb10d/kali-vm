@@ -121,5 +121,4 @@ actions:
 
   - description: "Pack {{ $rootfs }}"
     action: pack
-    compression: gz
-    file: {{ $rootfs }}.tar.gz
+    file: {{ $rootfs }}

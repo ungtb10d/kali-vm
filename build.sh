@@ -141,7 +141,7 @@ ask_confirmation || fail "Abort."
 mkdir -p images
 
 OPTS="-m 4G --scratchsize=16G"
-ROOTFS=images/rootfs-$ARCH
+ROOTFS=images/rootfs-$ARCH.tar.gz
 IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
 
 if [ $TYPE = rootfs ]; then
@@ -156,8 +156,8 @@ if [ $TYPE = rootfs ]; then
 fi
 
 REUSE_ROOTFS=0
-if [ -e $ROOTFS.tar.gz ]; then
-    ask_confirmation "Build image using existing rootfs $(b $ROOTFS.tar.gz)?" \
+if [ -e $ROOTFS ]; then
+    ask_confirmation "Build image using existing rootfs $(b $ROOTFS)?" \
         && REUSE_ROOTFS=1
 fi
 
