@@ -140,8 +140,7 @@ ask_confirmation || fail "Abort."
 
 mkdir -p images
 
-#OPTS="-m 8G"
-OPTS="--scratchsize=16G"
+OPTS="-m 4G --scratchsize=16G"
 ROOTFS=images/rootfs-$ARCH
 IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
 
