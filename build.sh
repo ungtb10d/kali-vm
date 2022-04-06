@@ -106,17 +106,9 @@ echo $SUPPORTED_TYPES | grep -qw $TYPE \
     || fail "Size must be given in GB and must contain only digits"
 [ "$VERSION" ] || VERSION=${BRANCH#kali-}
 
-# Print a summary of the build options
-if [ $TYPE = rootfs ]; then
-    echo "Build a Kali $(b $TYPE) for the $(b $ARCH) architecture."
-else
-    echo "Build a Kali $(b $TYPE) image for the $(b $ARCH) architecture. Disk size: $(b $SIZE)."
-fi
-echo "Use the $(b $BRANCH) branch, install the $(b $DESKTOP) desktop environment."
-echo "Build the image using the mirror $(b $MIRROR)."
-
 # Attempt to detect well-known http caching proxies on localhost,
 # cf. bash(1) section "REDIRECTION". This is not bullet-proof.
+echo "# Proxy configuration:"
 if ! [ -v http_proxy ]; then
     while read port proxy; do
         (</dev/tcp/localhost/$port) 2>/dev/null || continue
@@ -130,6 +122,16 @@ if [ "${http_proxy:-}" ]; then
 else
     echo "No http proxy configured, all packages will be downloaded from Internet."
 fi
+
+# Print a summary of the build options
+echo "# Build options:"
+if [ $TYPE = rootfs ]; then
+    echo "Build a Kali $(b $TYPE) for the $(b $ARCH) architecture."
+else
+    echo "Build a Kali $(b $TYPE) image for the $(b $ARCH) architecture. Disk size: $(b $SIZE)."
+fi
+echo "Use the $(b $BRANCH) branch, install the $(b $DESKTOP) desktop environment."
+echo "Build the image using the mirror $(b $MIRROR)."
 
 # Ask for confirmation before starting the build
 ask_confirmation || fail "Abort."
