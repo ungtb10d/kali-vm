@@ -16,6 +16,7 @@ ARCH=amd64
 BRANCH=kali-rolling
 DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
+ROOTFS=
 SIZE=80
 TYPE=generic
 VERSION=
@@ -56,6 +57,7 @@ Options:
   -b BRANCH   Kali branch used to build the image, default: $BRANCH
   -d DESKTOP  Desktop environment installed in the image, default: $DESKTOP
   -m MIRROR   Mirror used to build the image, default: $MIRROR
+  -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image created in GB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
   -v VERSION  Release version of Kali, defaults: ${BRANCH#kali-}
@@ -77,13 +79,14 @@ Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
-while getopts ":a:b:d:hm:s:t:v:z" opt; do
+while getopts ":a:b:d:hm:r:s:t:v:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
         (d) DESKTOP=$OPTARG ;;
         (h) echo "$USAGE" && exit 0 ;;
         (m) MIRROR=$OPTARG ;;
+        (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
         (t) TYPE=$OPTARG ;;
         (v) VERSION=$OPTARG ;;
@@ -93,6 +96,17 @@ while getopts ":a:b:d:hm:s:t:v:z" opt; do
 done
 shift $((OPTIND - 1))
 
+# When building an image from an existing rootfs, ARCH and VERSION are picked
+# from the rootfs name, and override whatever user might have passed on the
+# command line.
+if [ "$ROOTFS" ]; then
+    [ $TYPE != rootfs ] \
+        || fail "Option -r can only be used to build $(b images)"
+    ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
+    VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\.*/\1/")
+fi
+
+# Validate build options
 echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
     || fail "Unsupported architecture '$ARCH'"
 echo $SUPPORTED_BRANCHES | grep -qw $BRANCH \
@@ -104,6 +118,7 @@ echo $SUPPORTED_TYPES | grep -qw $TYPE \
 
 [[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GB \
     || fail "Size must be given in GB and must contain only digits"
+
 [ "$VERSION" ] || VERSION=${BRANCH#kali-}
 
 # Attempt to detect well-known http caching proxies on localhost,
@@ -143,10 +158,9 @@ ask_confirmation || fail "Abort."
 mkdir -p images
 
 OPTS="-m 4G --scratchsize=16G"
-ROOTFS=images/rootfs-$VERSION-$ARCH.tar.gz
-IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
 
 if [ $TYPE = rootfs ]; then
+    ROOTFS=images/rootfs-$VERSION-$ARCH.tar.gz
     debos $OPTS \
         -t arch:$ARCH \
         -t branch:$BRANCH \
@@ -157,13 +171,9 @@ if [ $TYPE = rootfs ]; then
     exit 0
 fi
 
-REUSE_ROOTFS=0
-if [ -e $ROOTFS ]; then
-    ask_confirmation "Build image using existing rootfs $(b $ROOTFS)?" \
-        && REUSE_ROOTFS=1
-fi
+IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
 
-if [ $REUSE_ROOTFS -eq 1 ]; then
+if [ "$ROOTFS" ]; then
     debos $OPTS \
         -t arch:$ARCH \
         -t imagename:$IMAGE \
