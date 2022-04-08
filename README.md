@@ -128,6 +128,13 @@ no proxy is used, `export http_proxy=`.
 Also refer to <https://github.com/go-debos/debos#environment-variables> for
 more details.
 
+### Building and reusing a rootfs
+
+It's possible to break the build in two steps. You can first build a rootfs
+with `./build.sh -t rootfs`, and then build an image based on this rootfs with
+`./build.sh -r ROOTFS_NAME.tar.gz`. It makes sense if you plan to build several
+image types, for example.
+
 ## Known limitations
 
 * Only `amd64` build is supported for now (nothing else was tested).
