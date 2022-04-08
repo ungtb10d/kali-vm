@@ -143,7 +143,7 @@ ask_confirmation || fail "Abort."
 mkdir -p images
 
 OPTS="-m 4G --scratchsize=16G"
-ROOTFS=images/rootfs-$ARCH.tar.gz
+ROOTFS=images/rootfs-$VERSION-$ARCH.tar.gz
 IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
 
 if [ $TYPE = rootfs ]; then
