@@ -149,11 +149,15 @@ fi
 echo "# Build options:"
 if [ $TYPE = rootfs ]; then
     echo "Build a Kali $(b $TYPE) for the $(b $ARCH) architecture."
+    echo "Get packages from the $(b $BRANCH) branch, from mirror $(b $MIRROR)."
+    echo "Install the $(b $DESKTOP) desktop environment."
+elif [ "$ROOTFS" ]; then
+    echo "Build a Kali $(b $TYPE) image based on $(b $ROOTFS). Disk size: $(b $SIZE)."
 else
     echo "Build a Kali $(b $TYPE) image for the $(b $ARCH) architecture. Disk size: $(b $SIZE)."
+    echo "Get packages from the $(b $BRANCH) branch, from mirror $(b $MIRROR)."
+    echo "Install the $(b $DESKTOP) desktop environment."
 fi
-echo "Use the $(b $BRANCH) branch, install the $(b $DESKTOP) desktop environment."
-echo "Build the image using the mirror $(b $MIRROR)."
 
 # Ask for confirmation before starting the build
 ask_confirmation || fail "Abort."
@@ -167,6 +171,7 @@ mkdir -p images
 OPTS="-m 4G --scratchsize=16G"
 
 if [ $TYPE = rootfs ]; then
+    echo "Building rootfs from recipe $(b rootfs.yaml) ..."
     ROOTFS=images/rootfs-$VERSION-$ARCH.tar.gz
     debos $OPTS \
         -t arch:$ARCH \
@@ -181,6 +186,7 @@ fi
 IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
 
 if [ "$ROOTFS" ]; then
+    echo "Building image from recipe $(b image.yaml) ..."
     debos $OPTS \
         -t arch:$ARCH \
         -t imagename:$IMAGE \
@@ -190,6 +196,7 @@ if [ "$ROOTFS" ]; then
         -t zip:$ZIP \
         image.yaml
 else
+    echo "Building image from recipe $(b full.yaml) ..."
     debos $OPTS \
         -t arch:$ARCH \
         -t branch:$BRANCH \
