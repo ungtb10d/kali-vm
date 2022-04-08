@@ -7,12 +7,14 @@ SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
 SUPPORTED_TYPES="generic qemu rootfs virtualbox"
 
+DEFAULT_ARCH=amd64
+
 WELL_KNOWN_PROXIES="\
 3142 apt-cacher-ng
 8000 squid-deb-proxy
 9999 approx"
 
-ARCH=amd64
+ARCH=
 BRANCH=kali-rolling
 DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
@@ -97,13 +99,20 @@ done
 shift $((OPTIND - 1))
 
 # When building an image from an existing rootfs, ARCH and VERSION are picked
-# from the rootfs name, and override whatever user might have passed on the
-# command line.
+# from the rootfs name. Otherwise it's set either from the command line, or
+# from the defaults.
 if [ "$ROOTFS" ]; then
     [ $TYPE != rootfs ] \
         || fail "Option -r can only be used to build $(b images)"
+    [ -z "$ARCH" ] \
+        || fail "Option -a can't be used together with option -r"
+    [ -z "$VERSION" ] \
+        || fail "Option -v can't be used together with option -r"
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
     VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\.*/\1/")
+else
+    [ "$ARCH" ] || ARCH=$DEFAULT_ARCH
+    [ "$VERSION" ] || VERSION=${BRANCH#kali-}
 fi
 
 # Validate build options
@@ -118,8 +127,6 @@ echo $SUPPORTED_TYPES | grep -qw $TYPE \
 
 [[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GB \
     || fail "Size must be given in GB and must contain only digits"
-
-[ "$VERSION" ] || VERSION=${BRANCH#kali-}
 
 # Attempt to detect well-known http caching proxies on localhost,
 # cf. bash(1) section "REDIRECTION". This is not bullet-proof.
