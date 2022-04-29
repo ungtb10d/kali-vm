@@ -30,11 +30,19 @@ b() { tput bold; echo -n "$@"; tput sgr0; }
 ask_confirmation() {
     local question=${1:-"Do you want to continue?"}
     local answer=
+    local choices=
     local default=yes
     local timeout=10
     local ret=0
 
-    read -r -t $timeout -p "$question [Y/n] " answer || ret=$?
+    # Capitalize the default choice
+    [ $default = yes ] && choices="[Y/n]" || choices="[y/N]"
+
+    # Discard chars pending on stdin
+    while read -r -t 0; do read -n 256 -r -s; done
+
+    # Ask the question
+    read -r -t $timeout -p "$question $choices " answer || ret=$?
     if [ $ret -gt 128 ]; then
         echo "No answer, assuming $default."
         answer=$default
