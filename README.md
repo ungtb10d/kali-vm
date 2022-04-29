@@ -105,7 +105,8 @@ Different types of images can be built using the option `-t`:
 ### Image configuration (not exposed by build.sh yet)
 
 * `locale` pick a value in 1st column of `/usr/share/i18n/SUPPORTED`
-* `timezone` of the form `<dir>/<dir>` taken from `/usr/share/zoneinfo`
+* `timezone` of the form `<dir>/<dir>` taken from `/usr/share/zoneinfo`. In
+  doubt, run `tzselect` to guide you.
 
 ### Caching proxy configuration
 
