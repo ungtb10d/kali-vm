@@ -63,7 +63,7 @@ USAGE="Usage: $(basename $0) [<option>...]
 Build a Kali Linux OS image.
 
 Options:
-  -a ARCH     Build an image for this architecture, default: $ARCH
+  -a ARCH     Build an image for this architecture, default: $DEFAULT_ARCH
   -b BRANCH   Kali branch used to build the image, default: $BRANCH
   -d DESKTOP  Desktop environment installed in the image, default: $DESKTOP
   -m MIRROR   Mirror used to build the image, default: $MIRROR
