@@ -117,7 +117,7 @@ if [ "$ROOTFS" ]; then
     [ -z "$VERSION" ] \
         || fail "Option -v can't be used together with option -r"
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
-    VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\.*/\1/")
+    VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
 else
     [ "$ARCH" ] || ARCH=$DEFAULT_ARCH
     [ "$VERSION" ] || VERSION=${BRANCH#kali-}
