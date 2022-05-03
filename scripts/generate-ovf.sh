@@ -34,6 +34,34 @@ get_virtual_disk_capacity() {
         | sed -E "s/.* \(([0-9]+) bytes\)$/\1/"
 }
 
+get_virtual_disk_format() {
+
+    # Get a url to describe the disk format.
+
+    local disk=$1
+    local buf=
+    local format=
+    local subformat=
+    local url=
+
+    buf=$(qemu-img info $disk)
+
+    format=$(echo "$buf" | sed -n "s/^file format: *//p")
+    if [ "$format" != vmdk ]; then
+        return
+    fi
+
+    url="http://www.vmware.com/interfaces/specifications/vmdk.html"
+
+    subformat=$(echo "$buf" | sed -n "s/^ *create type: *//p")
+    case "$subformat" in
+        monolithicSparse) url+="#sparse" ;;
+        streamOptimized)  url+="#streamOptimized" ;;
+    esac
+
+    echo $url
+}
+
 # Validate arguments
 
 [ $# -eq 1 ] || usage
@@ -56,6 +84,7 @@ version=$(echo $name | sed -E 's/^kali-linux-(.+)-.+-.+$/\1/')
 [ "$version" ] || fail "Failed to get version from image name '$name'"
 
 disk_capacity=$(get_virtual_disk_capacity $disk_path)
+disk_format=$(get_virtual_disk_format $disk_path)
 # AFAIK the disk uuid is not set by qemu-img, in such case we generate something random
 disk_uuid=$(get_vmdk_disk_uuid $disk_path)
 [ "$disk_uuid" ] || disk_uuid=$(cat /proc/sys/kernel/random/uuid)
@@ -107,6 +136,7 @@ output=${disk_path%.*}.ovf
 sed \
     -e "s|%Capacity%|$disk_capacity|g" \
     -e "s|%DiskFile%|$disk_file|g" \
+    -e "s|%DiskFormat%|$disk_format|g" \
     -e "s|%DiskUUID%|$disk_uuid|g" \
     -e "s|%License%|$license|g" \
     -e "s|%LongMode%|$long_mode|g" \
