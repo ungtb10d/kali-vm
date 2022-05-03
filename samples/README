@@ -1,1 +1,6 @@
-Those samples are the metadata files extracted from the Kali Linux official VM images.
+Samples of VM definitions in different formats.
+
+* `*-vbox` and `*-vmware`: metadata files extracted from the Kali Linux
+  official VM images.
+* `vmware-export-ovf`: OVF file obtained by exporting the official Kali
+  Linux VMware VM to the OVF format.
