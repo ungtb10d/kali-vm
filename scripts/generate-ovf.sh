@@ -85,6 +85,7 @@ version=$(echo $name | sed -E 's/^kali-linux-(.+)-.+-.+$/\1/')
 
 disk_capacity=$(get_virtual_disk_capacity $disk_path)
 disk_format=$(get_virtual_disk_format $disk_path)
+disk_size=$(stat -c %s $disk_path)
 # AFAIK the disk uuid is not set by qemu-img, in such case we generate something random
 disk_uuid=$(get_vmdk_disk_uuid $disk_path)
 [ "$disk_uuid" ] || disk_uuid=$(cat /proc/sys/kernel/random/uuid)
@@ -137,6 +138,7 @@ sed \
     -e "s|%Capacity%|$disk_capacity|g" \
     -e "s|%DiskFile%|$disk_file|g" \
     -e "s|%DiskFormat%|$disk_format|g" \
+    -e "s|%DiskSize%|$disk_size|g" \
     -e "s|%DiskUUID%|$disk_uuid|g" \
     -e "s|%License%|$license|g" \
     -e "s|%LongMode%|$long_mode|g" \
