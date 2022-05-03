@@ -31,7 +31,7 @@
       <Info>License agreement for the virtual system</Info>
       <License>%License%</License>
     </EulaSection>
-    <OperatingSystemSection ovf:id="%OSId%">
+    <OperatingSystemSection ovf:id="%OSId%" ovf:version="%OSVersion%">
       <Info>The kind of installed guest operating system</Info>
       <Description>%OSType%</Description>
       <vbox:OSType ovf:required="false">%OSType%</vbox:OSType>

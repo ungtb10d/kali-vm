@@ -100,11 +100,16 @@ vendor_url="https://www.offensive-security.com/"
 
 # For OS IDs and types, refer to:
 # https://docs.openlmi.org/en/latest/mof/CIM_SoftwareElement.html
+#
+# The os_type is NOT what's documented in the reference above.
+# It's what VirtualBox comes up with when exporting to OVA,
+# and it's a keyword that ends up in <vbox:Machine OSType="xxx">.
 case $arch in
     amd64)
         long_mode=true
         os_id=96
         os_type=Debian_64
+        os_version=10
         platform=x64
         product_version="$product_version x64"
         ;;
@@ -112,6 +117,7 @@ case $arch in
         long_mode=false
         os_id=95
         os_type=Debian
+        os_version=10
         platform=x86
         product_version="$product_version x86"
         ;;
@@ -146,6 +152,7 @@ sed \
     -e "s|%MachineUUID%|$machine_uuid|g" \
     -e "s|%OSId%|$os_id|g" \
     -e "s|%OSType%|$os_type|g" \
+    -e "s|%OSVersion%|$os_version|g" \
     -e "s|%Product%|$product|g" \
     -e "s|%ProductUrl%|$product_url|g" \
     -e "s|%ProductVersion%|$product_version|g" \
