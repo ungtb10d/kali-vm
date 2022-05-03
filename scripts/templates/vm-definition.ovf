@@ -96,7 +96,8 @@
         <rasd:InstanceID>6</rasd:InstanceID>
         <rasd:ResourceType>23</rasd:ResourceType>
       </Item>
-      <Item>
+      <!-- VMware fails to import the sound card, it doesn't know about ResourceType 35, hence required=false -->
+      <Item ovf:required="false">
         <rasd:AddressOnParent>3</rasd:AddressOnParent>
         <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
         <rasd:Caption>sound</rasd:Caption>
