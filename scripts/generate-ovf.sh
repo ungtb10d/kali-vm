@@ -22,9 +22,10 @@ get_vmdk_disk_uuid() {
         | sed -n "s/^ddb\.uuid\.image=//p" | tr -d '"'
 }
 
-get_virtual_disk_size() {
+get_virtual_disk_capacity() {
 
-    # Get the size of a virtual disk. Tested with: .vmdk, .vdi.
+    # Get the capacity of a virtual disk.
+    # Tested with the following formats: vmdk, vdi.
 
     local disk=$1
 
@@ -54,7 +55,7 @@ arch=${name##*-}
 version=$(echo $name | sed -E 's/^kali-linux-(.+)-.+-.+$/\1/')
 [ "$version" ] || fail "Failed to get version from image name '$name'"
 
-disk_size=$(get_virtual_disk_size $disk_path)
+disk_capacity=$(get_virtual_disk_capacity $disk_path)
 # AFAIK the disk uuid is not set by qemu-img, in such case we generate something random
 disk_uuid=$(get_vmdk_disk_uuid $disk_path)
 [ "$disk_uuid" ] || disk_uuid=$(cat /proc/sys/kernel/random/uuid)
@@ -104,7 +105,7 @@ description=$(sed \
 output=${disk_path%.*}.ovf
 
 sed \
-    -e "s|%Capacity%|$disk_size|g" \
+    -e "s|%Capacity%|$disk_capacity|g" \
     -e "s|%DiskFile%|$disk_file|g" \
     -e "s|%DiskUUID%|$disk_uuid|g" \
     -e "s|%License%|$license|g" \
