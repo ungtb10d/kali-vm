@@ -7,8 +7,6 @@ SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
 SUPPORTED_TYPES="generic qemu rootfs virtualbox"
 
-DEFAULT_ARCH=amd64
-
 WELL_KNOWN_PROXIES="\
 3142 apt-cacher-ng
 8000 squid-deb-proxy
@@ -23,6 +21,9 @@ SIZE=80
 TYPE=generic
 VERSION=
 ZIP=false
+
+DEFAULT_ARCH=amd64
+DEFAULT_VERSION=${BRANCH#kali-}
 
 fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
@@ -70,7 +71,7 @@ Options:
   -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image created in GB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
-  -v VERSION  Release version of Kali, defaults: ${BRANCH#kali-}
+  -v VERSION  Release version of Kali, defaults: $DEFAULT_VERSION
   -z          Zip images and metadata files after the build.
 
 Supported values for some options:
@@ -120,7 +121,7 @@ if [ "$ROOTFS" ]; then
     VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
 else
     [ "$ARCH" ] || ARCH=$DEFAULT_ARCH
-    [ "$VERSION" ] || VERSION=${BRANCH#kali-}
+    [ "$VERSION" ] || VERSION=$DEFAULT_VERSION
 fi
 
 # Validate build options
