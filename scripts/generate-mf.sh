@@ -26,19 +26,3 @@ cat << EOF > $mf
 SHA1 ($(basename $ovf)) = $ovf_sha
 SHA1 ($(basename $vmdk)) = $vmdk_sha
 EOF
-
-# Create the archive (.ova).
-# Order matters. The .ovf must come first. The .mf comes either
-# second or last. For more details, refer to the OVF specification:
-# https://www.dmtf.org/sites/default/files/standards/documents/DSP0243_1.1.0.pdf
-
-# Enter workdir, assume all the files are in the same directory.
-
-cd $(dirname $ovf)
-ovf=$(basename $ovf)
-vmdk=$(basename $vmdk)
-mf=$(basename $mf)
-
-ova=${ovf%.*}.ova
-
-tar -cvf $ova $ovf $vmdk $mf
