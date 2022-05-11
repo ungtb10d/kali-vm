@@ -22,8 +22,8 @@ TYPE=generic
 VERSION=
 ZIP=false
 
-DEFAULT_ARCH=amd64
-DEFAULT_VERSION=${BRANCH#kali-}
+default_arch() { echo amd64; }
+default_version() { echo ${BRANCH#kali-}; }
 
 fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
@@ -64,14 +64,14 @@ USAGE="Usage: $(basename $0) [<option>...]
 Build a Kali Linux OS image.
 
 Options:
-  -a ARCH     Build an image for this architecture, default: $DEFAULT_ARCH
+  -a ARCH     Build an image for this architecture, default: $(default_arch)
   -b BRANCH   Kali branch used to build the image, default: $BRANCH
   -d DESKTOP  Desktop environment installed in the image, default: $DESKTOP
   -m MIRROR   Mirror used to build the image, default: $MIRROR
   -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image created in GB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
-  -v VERSION  Release version of Kali, defaults: $DEFAULT_VERSION
+  -v VERSION  Release version of Kali, defaults: $(default_version)
   -z          Zip images and metadata files after the build.
 
 Supported values for some options:
@@ -120,8 +120,8 @@ if [ "$ROOTFS" ]; then
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
     VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
 else
-    [ "$ARCH" ] || ARCH=$DEFAULT_ARCH
-    [ "$VERSION" ] || VERSION=$DEFAULT_VERSION
+    [ "$ARCH" ] || ARCH=$(default_arch)
+    [ "$VERSION" ] || VERSION=$(default_version)
 fi
 
 # Validate build options
