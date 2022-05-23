@@ -182,15 +182,8 @@ actions:
     chroot: false
     script: scripts/cleanup-out.sh
 
-  {{ if eq $format "raw" }}
-  - description: "Rename to {{ $imagename }}.img"
-    action: run
-    postprocess: true
-    command: mv -v {{ $imagename }}.raw {{ $imagename }}.img
-  {{ else }}
   - description: "Export to a {{ $format }} image"
     label: "export-{{ $format }}"
     action: run
     postprocess: true
     script: scripts/export-{{ $format }}.sh {{ if eq $zip "true" }}-z{{ end }} {{ $imagename }}
-  {{ end }}
