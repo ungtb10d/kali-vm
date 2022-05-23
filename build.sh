@@ -16,9 +16,9 @@ WELL_KNOWN_PROXIES="\
 9999 approx"
 
 ARCH=
-BRANCH=kali-rolling
-DESKTOP=xfce
-MIRROR=http://http.kali.org/kali
+BRANCH=
+DESKTOP=
+MIRROR=
 PACKAGES=
 ROOTFS=
 SIZE=80
@@ -27,6 +27,9 @@ VERSION=
 ZIP=false
 
 default_arch() { echo amd64; }
+default_branch() { echo kali-rolling; }
+default_desktop() { echo xfce; }
+default_mirror() { echo http://http.kali.org/kali; }
 default_version() { echo ${BRANCH#kali-}; }
 
 fail() { echo "$@" >&2; exit 1; }
@@ -69,9 +72,9 @@ Build a Kali Linux OS image.
 
 Options:
   -a ARCH     Build an image for this architecture, default: $(default_arch)
-  -b BRANCH   Kali branch used to build the image, default: $BRANCH
-  -d DESKTOP  Desktop environment installed in the image, default: $DESKTOP
-  -m MIRROR   Mirror used to build the image, default: $MIRROR
+  -b BRANCH   Kali branch used to build the image, default: $(default_branch)
+  -d DESKTOP  Desktop environment installed in the image, default: $(default_desktop)
+  -m MIRROR   Mirror used to build the image, default: $(default_mirror)
   -p PACKAGES Install extra packages (comma/space separated list)
   -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image created in GB, default: $SIZE
@@ -132,19 +135,21 @@ echo $SUPPORTED_FORMATS | grep -qw $FORMAT \
 unset TYPE
 
 # When building an image from an existing rootfs, ARCH and VERSION are picked
-# from the rootfs name. Otherwise it's set either from the command line, or
-# from the defaults.
+# from the rootfs name. Moreover, BRANCH, DESKTOP and MIRROR don't apply.
 if [ "$ROOTFS" ]; then
-    [ $VARIANT != rootfs ] \
-        || fail "Option -r can only be used to build $(b images)"
-    [ -z "$ARCH" ] \
-        || fail "Option -a can't be used together with option -r"
-    [ -z "$VERSION" ] \
-        || fail "Option -v can't be used together with option -r"
+    [ $VARIANT != rootfs ] || fail "Option -r can only be used to build images"
+    [ -z "$ARCH"    ] || fail "Option -a can't be used together with option -r"
+    [ -z "$BRANCH"  ] || fail "Option -b can't be used together with option -r"
+    [ -z "$DESKTOP" ] || fail "Option -d can't be used together with option -r"
+    [ -z "$MIRROR"  ] || fail "Option -m can't be used together with option -r"
+    [ -z "$VERSION" ] || fail "Option -v can't be used together with option -r"
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
     VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
 else
-    [ "$ARCH" ] || ARCH=$(default_arch)
+    [ "$ARCH"    ] || ARCH=$(default_arch)
+    [ "$BRANCH"  ] || BRANCH=$(default_branch)
+    [ "$DESKTOP" ] || DESKTOP=$(default_desktop)
+    [ "$MIRROR"  ] || MIRROR=$(default_mirror)
     [ "$VERSION" ] || VERSION=$(default_version)
 fi
 
@@ -155,10 +160,14 @@ PACKAGES=$(echo $PACKAGES | sed "s/[, ]\+/\n/g" | LC_ALL=C sort -u \
 # Validate other options
 echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
     || fail "Unsupported architecture '$ARCH'"
-echo $SUPPORTED_BRANCHES | grep -qw $BRANCH \
-    || fail "Unsupported branch '$BRANCH'"
-echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
-    || fail "Unsupported desktop '$DESKTOP'"
+if [ "$BRANCH" ]; then
+    echo $SUPPORTED_BRANCHES | grep -qw $BRANCH \
+        || fail "Unsupported branch '$BRANCH'"
+fi
+if [ "$DESKTOP" ]; then
+    echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
+        || fail "Unsupported desktop '$DESKTOP'"
+fi
 
 [[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GB \
     || fail "Size must be given in GB and must contain only digits"
