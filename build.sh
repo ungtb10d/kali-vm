@@ -190,21 +190,21 @@ else
 fi
 
 # Print a summary of the build options
-# XXX print extra packages as well
 echo "# Build options:"
 if [ $VARIANT = rootfs ]; then
     echo "Build a Kali $(b $VARIANT) for the $(b $ARCH) architecture."
-    echo "Get packages from the mirror $(b $MIRROR)."
-    echo "Use the branch $(b $BRANCH)."
-    echo "Install the $(b $DESKTOP) desktop environment."
-elif [ "$ROOTFS" ]; then
-    echo "Build a Kali $(b $VARIANT) image based on $(b $ROOTFS). Disk size: $(b $SIZE)."
 else
-    echo "Build a Kali $(b $VARIANT) image for the $(b $ARCH) architecture. Disk size: $(b $SIZE)."
-    echo "Get packages from the mirror $(b $MIRROR)."
-    echo "Use the branch $(b $BRANCH)."
-    echo "Install the $(b $DESKTOP) desktop environment."
+    if [ "$ROOTFS" ]; then
+        echo "Build a Kali $(b $VARIANT) image based on $(b $ROOTFS)."
+    else
+        echo "Build a Kali $(b $VARIANT) image for the $(b $ARCH) architecture."
+    fi
+    echo "Export the image to the $(b $FORMAT) format. Disk size: $(b $SIZE)."
 fi
+[ "$MIRROR"   ] && echo "* mirror: $(b $MIRROR)"
+[ "$BRANCH"   ] && echo "* branch: $(b $BRANCH)"
+[ "$DESKTOP"  ] && echo "* desktop environment: $(b $DESKTOP)"
+[ "$PACKAGES" ] && echo "* additional packages: $(b $PACKAGES)"
 
 # Ask for confirmation before starting the build
 ask_confirmation || fail "Abort."
