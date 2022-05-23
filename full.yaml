@@ -4,6 +4,7 @@
 {{ $format := .format }}
 {{ $imagename := .imagename }}
 {{ $mirror := .mirror }}
+{{ $packages := .packages }}
 {{ $size := .size }}
 {{ $variant := .variant }}
 {{ $zip := .zip }}
@@ -94,6 +95,13 @@ actions:
 #    description: "HACK - Make package list identical compared to current VM images"
 #    chroot: true
 #    script: scripts/hack-tidy-up-packages
+
+{{ if ne $packages "" }}
+  - description: "Install extra packages: {{ $packages }}"
+    action: apt
+    recommends: true
+    packages: [ {{ $packages }} ]
+{{ end }}
 
   - action: overlay
     source: overlays/loopback-interface

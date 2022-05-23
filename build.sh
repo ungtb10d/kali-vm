@@ -19,6 +19,7 @@ ARCH=
 BRANCH=kali-rolling
 DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
+PACKAGES=
 ROOTFS=
 SIZE=80
 TYPE=generic-raw
@@ -71,6 +72,7 @@ Options:
   -b BRANCH   Kali branch used to build the image, default: $BRANCH
   -d DESKTOP  Desktop environment installed in the image, default: $DESKTOP
   -m MIRROR   Mirror used to build the image, default: $MIRROR
+  -p PACKAGES Install extra packages (comma/space separated list)
   -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image created in GB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
@@ -94,13 +96,14 @@ Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
-while getopts ":a:b:d:hm:r:s:t:v:z" opt; do
+while getopts ":a:b:d:hm:p:r:s:t:v:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
         (d) DESKTOP=$OPTARG ;;
         (h) echo "$USAGE" && exit 0 ;;
         (m) MIRROR=$OPTARG ;;
+        (p) PACKAGES="$PACKAGES $OPTARG" ;;
         (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
         (t) TYPE=$OPTARG ;;
@@ -145,6 +148,10 @@ else
     [ "$VERSION" ] || VERSION=$(default_version)
 fi
 
+# Order packages alphabetically, separate each package by ', '
+PACKAGES=$(echo $PACKAGES | sed "s/[, ]\+/\n/g" | LC_ALL=C sort -u \
+    | awk 'ORS=", "' | sed "s/[, ]*$//")
+
 # Validate other options
 echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
     || fail "Unsupported architecture '$ARCH'"
@@ -174,6 +181,7 @@ else
 fi
 
 # Print a summary of the build options
+# XXX print extra packages as well
 echo "# Build options:"
 if [ $VARIANT = rootfs ]; then
     echo "Build a Kali $(b $VARIANT) for the $(b $ARCH) architecture."
@@ -208,6 +216,7 @@ if [ $VARIANT = rootfs ]; then
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
         -t mirror:$MIRROR \
+        -t packages:"$PACKAGES" \
         -t rootfs:$ROOTFS \
         rootfs.yaml
     exit 0
@@ -235,6 +244,7 @@ else
         -t format:$FORMAT \
         -t imagename:$IMAGE \
         -t mirror:$MIRROR \
+        -t packages:"$PACKAGES" \
         -t size:$SIZE \
         -t variant:$VARIANT \
         -t zip:$ZIP \

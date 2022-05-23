@@ -107,6 +107,12 @@ Different types of images can be built using the option `-t`:
   not installed. The main use-case is to reuse it as input to build an OS
   image.
 
+### Additional configuration
+
+You can install additional packages with the `-p` option. Either use the option
+several times (eg. `-p pkg1 -p pkg2 ...`), or give a comma/space separated
+value (eg. `-p "pkg1,pkg2, pkg3 pkg4"`), or a mix of both.
+
 ### Image configuration (not exposed by build.sh yet)
 
 * `locale` pick a value in 1st column of `/usr/share/i18n/SUPPORTED`
