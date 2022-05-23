@@ -7,7 +7,7 @@ zip=0
 
 while [ $# -gt 0 ]; do
     case $1 in
-        -z) zip=$1 ;;
+        -z) zip=1 ;;
         *) image=$1 ;;
     esac
     shift
