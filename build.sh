@@ -77,10 +77,10 @@ Options:
   -m MIRROR   Mirror used to build the image, default: $(default_mirror)
   -p PACKAGES Install extra packages (comma/space separated list)
   -r ROOTFS   Rootfs to use to build the image, default: none
-  -s SIZE     Size of the disk image created in GB, default: $SIZE
+  -s SIZE     Size of the disk image in GB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
-  -v VERSION  Release version of Kali, defaults: $(default_version)
-  -z          Zip images and metadata files after the build.
+  -v VERSION  Release version of Kali, default: $(default_version)
+  -z          Zip images and metadata files after the build
 
 Supported values for some options:
   ARCH        $SUPPORTED_ARCHITECTURES
@@ -91,7 +91,7 @@ Supported values for some options:
 The different types of images that can be built are:
   generic-ovf Build a $(b sparse VMDK) disk image and a $(b OVF) metadata file.
   generic-raw Build a $(b sparse raw) disk image.
-  qemu        Build a $(b QCOW2) image.
+  qemu        Build a $(b QCOW2) disk image.
   virtualbox  Build a $(b VDI) disk image and a $(b .vbox) metadata file.
   rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
 
@@ -153,11 +153,15 @@ else
     [ "$VERSION" ] || VERSION=$(default_version)
 fi
 
-# Order packages alphabetically, separate each package by ', '
+# Order packages alphabetically, separate each package with ", "
 PACKAGES=$(echo $PACKAGES | sed "s/[, ]\+/\n/g" | LC_ALL=C sort -u \
     | awk 'ORS=", "' | sed "s/[, ]*$//")
 
-# Validate other options
+# Validate size and add the "GB" suffix
+[[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GB \
+    || fail "Size must be given in GB and must contain only digits"
+
+# Validate some options
 echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
     || fail "Unsupported architecture '$ARCH'"
 if [ "$BRANCH" ]; then
@@ -168,9 +172,6 @@ if [ "$DESKTOP" ]; then
     echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
         || fail "Unsupported desktop '$DESKTOP'"
 fi
-
-[[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GB \
-    || fail "Size must be given in GB and must contain only digits"
 
 # Attempt to detect well-known http caching proxies on localhost,
 # cf. bash(1) section "REDIRECTION". This is not bullet-proof.
