@@ -1,8 +1,9 @@
 {{ $arch := .arch }}
+{{ $format := .format }}
 {{ $imagename := .imagename }}
 {{ $rootfs := .rootfs }}
 {{ $size := .size }}
-{{ $type := .type }}
+{{ $variant := .variant }}
 {{ $zip := .zip }}
 
 architecture: {{ $arch }}
@@ -47,21 +48,21 @@ actions:
     chroot: true
     command: update-grub && grub-install "$IMAGE"
 
-  - description: "Install virtualization support for {{ $type }}"
+  - description: "Install virtualization support for {{ $variant }}"
     action: apt
     recommends: true
-  {{ if eq $type "qemu" }}
+  {{ if eq $variant "qemu" }}
     packages: [ qemu-guest-agent, spice-vdagent ]
-  {{ else if eq $type "virtualbox" }}
+  {{ else if eq $variant "virtualbox" }}
     packages: [ virtualbox-guest-x11 ]
-  {{ else if eq $type "vmware" }}
+  {{ else if eq $variant "vmware" }}
     packages: [ open-vm-tools-desktop ]
-  {{ else if eq $type "generic" }}
+  {{ else if eq $variant "generic" }}
     packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent, virtualbox-guest-x11 ]
   {{ end }}
 
-  {{ if eq $type "vmware" }}
-  - description: "Finish install for {{ $type }}"
+  {{ if eq $variant "vmware" }}
+  - description: "Finish install for {{ $variant }}"
     action: run
     chroot: true
     script: scripts/finish-install-vmware.sh
@@ -82,15 +83,15 @@ actions:
     chroot: false
     script: scripts/cleanup-out.sh
 
-  {{ if eq $type "raw" }}
+  {{ if eq $format "raw" }}
   - description: "Rename to {{ $imagename }}.img"
     action: run
     postprocess: true
     command: mv -v {{ $imagename }}.raw {{ $imagename }}.img
   {{ else }}
-  - description: "Export to a {{ $type }} image"
-    label: "export-{{ $type }}"
+  - description: "Export to a {{ $format }} image"
+    label: "export-{{ $format }}"
     action: run
     postprocess: true
-    script: scripts/export-{{ $type }}.sh {{ if eq $zip "true" }}-z{{ end }} {{ $imagename }}
+    script: scripts/export-{{ $format }}.sh {{ if eq $zip "true" }}-z{{ end }} {{ $imagename }}
   {{ end }}

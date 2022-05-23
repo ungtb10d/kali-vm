@@ -5,7 +5,10 @@ set -eu
 SUPPORTED_ARCHITECTURES="amd64"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
-SUPPORTED_TYPES="generic qemu rootfs virtualbox"
+SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox"
+SUPPORTED_VARIANTS="generic qemu rootfs virtualbox"
+
+SUGGESTED_TYPES="generic-ovf generic-raw qemu rootfs virtualbox"
 
 WELL_KNOWN_PROXIES="\
 3142 apt-cacher-ng
@@ -18,7 +21,7 @@ DESKTOP=xfce
 MIRROR=http://http.kali.org/kali
 ROOTFS=
 SIZE=80
-TYPE=generic
+TYPE=generic-raw
 VERSION=
 ZIP=false
 
@@ -78,10 +81,11 @@ Supported values for some options:
   ARCH        $SUPPORTED_ARCHITECTURES
   BRANCH      $SUPPORTED_BRANCHES
   DESKTOP     $SUPPORTED_DESKTOPS
-  TYPE        $SUPPORTED_TYPES
+  TYPE        $SUGGESTED_TYPES
 
 The different types of images that can be built are:
-  generic     Build a $(b sparse VMDK) disk image and a $(b OVF) metadata file.
+  generic-ovf Build a $(b sparse VMDK) disk image and a $(b OVF) metadata file.
+  generic-raw Build a $(b sparse raw) disk image.
   qemu        Build a $(b QCOW2) image.
   virtualbox  Build a $(b VDI) disk image and a $(b .vbox) metadata file.
   rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
@@ -107,11 +111,28 @@ while getopts ":a:b:d:hm:r:s:t:v:z" opt; do
 done
 shift $((OPTIND - 1))
 
+# The image TYPE bundles two settings: the VARIANT (eg. extra packages to
+# install, additional configuration, and so on) and the FORMAT. In its long
+# form, the TYPE is just VARIANT-FORMAT. More often than not though, variant
+# and format are the same, so for convenience a short form is allowed.
+if echo $TYPE | grep -q "-"; then
+    VARIANT=$(echo $TYPE | cut -d- -f1)
+    FORMAT=$(echo $TYPE | cut -d- -f2)
+else
+    VARIANT=$TYPE
+    FORMAT=$TYPE
+fi
+echo $SUPPORTED_VARIANTS | grep -qw $VARIANT \
+    || fail "Unsupported type '$TYPE'"
+echo $SUPPORTED_FORMATS | grep -qw $FORMAT \
+    || fail "Unsupported type '$TYPE'"
+unset TYPE
+
 # When building an image from an existing rootfs, ARCH and VERSION are picked
 # from the rootfs name. Otherwise it's set either from the command line, or
 # from the defaults.
 if [ "$ROOTFS" ]; then
-    [ $TYPE != rootfs ] \
+    [ $VARIANT != rootfs ] \
         || fail "Option -r can only be used to build $(b images)"
     [ -z "$ARCH" ] \
         || fail "Option -a can't be used together with option -r"
@@ -124,15 +145,13 @@ else
     [ "$VERSION" ] || VERSION=$(default_version)
 fi
 
-# Validate build options
+# Validate other options
 echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
     || fail "Unsupported architecture '$ARCH'"
 echo $SUPPORTED_BRANCHES | grep -qw $BRANCH \
     || fail "Unsupported branch '$BRANCH'"
 echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
     || fail "Unsupported desktop '$DESKTOP'"
-echo $SUPPORTED_TYPES | grep -qw $TYPE \
-    || fail "Unsupported type '$TYPE'"
 
 [[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GB \
     || fail "Size must be given in GB and must contain only digits"
@@ -156,15 +175,17 @@ fi
 
 # Print a summary of the build options
 echo "# Build options:"
-if [ $TYPE = rootfs ]; then
-    echo "Build a Kali $(b $TYPE) for the $(b $ARCH) architecture."
-    echo "Get packages from the $(b $BRANCH) branch, from mirror $(b $MIRROR)."
+if [ $VARIANT = rootfs ]; then
+    echo "Build a Kali $(b $VARIANT) for the $(b $ARCH) architecture."
+    echo "Get packages from the mirror $(b $MIRROR)."
+    echo "Use the branch $(b $BRANCH)."
     echo "Install the $(b $DESKTOP) desktop environment."
 elif [ "$ROOTFS" ]; then
-    echo "Build a Kali $(b $TYPE) image based on $(b $ROOTFS). Disk size: $(b $SIZE)."
+    echo "Build a Kali $(b $VARIANT) image based on $(b $ROOTFS). Disk size: $(b $SIZE)."
 else
-    echo "Build a Kali $(b $TYPE) image for the $(b $ARCH) architecture. Disk size: $(b $SIZE)."
-    echo "Get packages from the $(b $BRANCH) branch, from mirror $(b $MIRROR)."
+    echo "Build a Kali $(b $VARIANT) image for the $(b $ARCH) architecture. Disk size: $(b $SIZE)."
+    echo "Get packages from the mirror $(b $MIRROR)."
+    echo "Use the branch $(b $BRANCH)."
     echo "Install the $(b $DESKTOP) desktop environment."
 fi
 
@@ -179,7 +200,7 @@ mkdir -p images
 
 OPTS="-m 4G --scratchsize=16G"
 
-if [ $TYPE = rootfs ]; then
+if [ $VARIANT = rootfs ]; then
     echo "Building rootfs from recipe $(b rootfs.yaml) ..."
     ROOTFS=images/rootfs-$VERSION-$ARCH.tar.gz
     debos $OPTS \
@@ -192,16 +213,17 @@ if [ $TYPE = rootfs ]; then
     exit 0
 fi
 
-IMAGE=images/kali-linux-$VERSION-$TYPE-$ARCH
+IMAGE=images/kali-linux-$VERSION-$VARIANT-$ARCH
 
 if [ "$ROOTFS" ]; then
     echo "Building image from recipe $(b image.yaml) ..."
     debos $OPTS \
         -t arch:$ARCH \
+        -t format:$FORMAT \
         -t imagename:$IMAGE \
         -t rootfs:$ROOTFS \
         -t size:$SIZE \
-        -t type:$TYPE \
+        -t variant:$VARIANT \
         -t zip:$ZIP \
         image.yaml
 else
@@ -210,10 +232,11 @@ else
         -t arch:$ARCH \
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
+        -t format:$FORMAT \
         -t imagename:$IMAGE \
         -t mirror:$MIRROR \
         -t size:$SIZE \
-        -t type:$TYPE \
+        -t variant:$VARIANT \
         -t zip:$ZIP \
         full.yaml
 fi
