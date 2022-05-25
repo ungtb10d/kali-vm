@@ -37,10 +37,11 @@ Then **log out and log back in** for the change to take effect.
 
 ### Build from the host
 
-If building straight from your machine, you'll need to install `debos`:
+If building straight from your machine, you'll need to install `debos` and a
+little more:
 
 ```
-sudo apt install debos
+sudo apt install debos p7zip qemu-utils
 ```
 
 Then use the script `build.sh` to build an image.
