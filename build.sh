@@ -80,21 +80,21 @@ USAGE="Usage: $(basename $0) [<option>...]
 
 Build a Kali Linux OS image.
 
-Options:
+Build options:
   -a ARCH     Build an image for this architecture, default: $DEFAULT_ARCH
   -b BRANCH   Kali branch used to build the image, default: $DEFAULT_BRANCH
-  -d DESKTOP  Desktop environment installed in the image, default: $DEFAULT_DESKTOP
   -k          Keep raw disk image and other intermediary build artifacts
   -m MIRROR   Mirror used to build the image, default: $DEFAULT_MIRROR
-  -p PACKAGES Install extra packages (comma/space separated list)
   -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image in GB, default: $SIZE
   -t TYPE     Type of image to build (see below for details), default: $TYPE
   -v VERSION  Release version of Kali, default: $(default_version)
   -z          Zip images and metadata files after the build
 
-Options to customize the image:
+Customization options:
+  -D DESKTOP  Desktop environment installed in the image, default: $DEFAULT_DESKTOP
   -L LOCALE   Set locale, default: $DEFAULT_LOCALE
+  -P PACKAGES Install extra packages (comma/space separated list)
   -T TIMEZONE Set timezone, default: $DEFAULT_TIMEZONE
   -U USERPASS Username and password, separated by a colon, default: $DEFAULT_USERPASS
 
@@ -117,16 +117,16 @@ Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
-while getopts ":a:b:d:hkL:m:p:r:s:t:T:U:v:z" opt; do
+while getopts ":a:b:D:hkL:m:P:r:s:t:T:U:v:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
-        (d) DESKTOP=$OPTARG ;;
+        (D) DESKTOP=$OPTARG ;;
         (h) echo "$USAGE" && exit 0 ;;
         (k) KEEP=true ;;
         (L) LOCALE=$OPTARG ;;
         (m) MIRROR=$OPTARG ;;
-        (p) PACKAGES="$PACKAGES $OPTARG" ;;
+        (P) PACKAGES="$PACKAGES $OPTARG" ;;
         (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
         (t) TYPE=$OPTARG ;;
@@ -163,7 +163,7 @@ if [ "$ROOTFS" ]; then
     [ $VARIANT != rootfs ] || fail "Option -r can only be used to build images"
     [ -z "$ARCH"    ] || fail "Option -a can't be used together with option -r"
     [ -z "$BRANCH"  ] || fail "Option -b can't be used together with option -r"
-    [ -z "$DESKTOP" ] || fail "Option -d can't be used together with option -r"
+    [ -z "$DESKTOP" ] || fail "Option -D can't be used together with option -r"
     [ -z "$LOCALE"  ] || fail "Option -L can't be used together with option -r"
     [ -z "$MIRROR"  ] || fail "Option -m can't be used together with option -r"
     [ -z "$TIMEZONE" ] || fail "Option -T can't be used together with option -r"

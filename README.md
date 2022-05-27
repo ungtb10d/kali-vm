@@ -123,9 +123,11 @@ image.
 
 ### Additional configuration
 
-You can install additional packages with the `-p` option. Either use the option
-several times (eg. `-p pkg1 -p pkg2 ...`), or give a comma/space separated
-value (eg. `-p "pkg1,pkg2, pkg3 pkg4"`), or a mix of both.
+You can choose the desktop environment with the `-D` option.
+
+You can install additional packages with the `-P` option. Either use the option
+several times (eg. `-P pkg1 -P pkg2 ...`), or give a comma/space separated
+value (eg. `-P "pkg1,pkg2, pkg3 pkg4"`), or a mix of both.
 
 To set the `locale`, use the option `-L`.  Pick a value in the 1st column of
 `/usr/share/i18n/SUPPORTED`, or check what's configured on your system with
