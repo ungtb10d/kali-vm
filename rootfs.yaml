@@ -5,11 +5,12 @@
 {{ $packages := .packages }}
 {{ $rootfs := .rootfs }}
 
+{{ $locale := .locale }}
+{{ $password := .password }}
+{{ $timezone := .timezone }}
+{{ $username := .username }}
+
 {{ $hostname := or .hostname "kali" }}
-{{ $locale := or .locale "en_US.UTF-8" }}
-{{ $timezone := or .timezone "US/Eastern" }}
-{{ $user := or .user "kali" }}
-{{ $password := or .password "kali" }}
 
 architecture: {{ $arch }}
 
@@ -102,10 +103,10 @@ actions:
   - action: overlay
     source: overlays/loopback-interface
 
-  - description: "Create user {{ $user }}"
+  - description: "Create user {{ $username }}"
     action: run
     chroot: true
-    script: scripts/create-user.sh {{ $user }} {{ $password }}
+    script: scripts/create-user.sh {{ $username }} "{{ $password }}"
 
   - description: "Disable tmpfiles.d/systemd-resolve.conf, cf. #1007018"
     action: run

@@ -9,7 +9,7 @@ echo "INFO: create user '$username'"
 adduser --disabled-password --gecos "" $username
 
 echo "INFO: set user password"
-echo $username:$password | chpasswd
+echo $username:"$password" | chpasswd
 
 # Default groups for users are defined in different places:
 #

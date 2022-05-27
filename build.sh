@@ -15,15 +15,24 @@ WELL_KNOWN_PROXIES="\
 8000 squid-deb-proxy
 9999 approx"
 
+DEFAULT_LOCALE=en_US.UTF-8
+DEFAULT_TIMEZONE=US/Eastern
+DEFAULT_USERPASS=kali:kali
+
 ARCH=
 BRANCH=
 DESKTOP=
 KEEP=false
+LOCALE=
 MIRROR=
 PACKAGES=
+PASSWORD=
 ROOTFS=
 SIZE=80
+TIMEZONE=
 TYPE=generic-raw
+USERNAME=
+USERPASS=
 VERSION=
 ZIP=false
 
@@ -84,6 +93,11 @@ Options:
   -v VERSION  Release version of Kali, default: $(default_version)
   -z          Zip images and metadata files after the build
 
+Options to customize the image:
+  -L LOCALE   Set locale, default: $DEFAULT_LOCALE
+  -T TIMEZONE Set timezone, default: $DEFAULT_TIMEZONE
+  -U USERPASS Username and password, separated by a colon, default: $DEFAULT_USERPASS
+
 Supported values for some options:
   ARCH        $SUPPORTED_ARCHITECTURES
   BRANCH      $SUPPORTED_BRANCHES
@@ -103,18 +117,21 @@ Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
-while getopts ":a:b:d:hkm:p:r:s:t:v:z" opt; do
+while getopts ":a:b:d:hkL:m:p:r:s:t:T:U:v:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
         (d) DESKTOP=$OPTARG ;;
         (h) echo "$USAGE" && exit 0 ;;
         (k) KEEP=true ;;
+        (L) LOCALE=$OPTARG ;;
         (m) MIRROR=$OPTARG ;;
         (p) PACKAGES="$PACKAGES $OPTARG" ;;
         (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
         (t) TYPE=$OPTARG ;;
+        (T) TIMEZONE=$OPTARG ;;
+        (U) USERPASS=$OPTARG ;;
         (v) VERSION=$OPTARG ;;
         (z) ZIP=true ;;
         (*) fail "$USAGE" ;;
@@ -140,13 +157,17 @@ echo $SUPPORTED_FORMATS | grep -qw $FORMAT \
 unset TYPE
 
 # When building an image from an existing rootfs, ARCH and VERSION are picked
-# from the rootfs name. Moreover, BRANCH, DESKTOP and MIRROR don't apply.
+# from the rootfs name. Moreover, many options don't apply, as they've been
+# set already at the time the rootfs was built.
 if [ "$ROOTFS" ]; then
     [ $VARIANT != rootfs ] || fail "Option -r can only be used to build images"
     [ -z "$ARCH"    ] || fail "Option -a can't be used together with option -r"
     [ -z "$BRANCH"  ] || fail "Option -b can't be used together with option -r"
     [ -z "$DESKTOP" ] || fail "Option -d can't be used together with option -r"
+    [ -z "$LOCALE"  ] || fail "Option -L can't be used together with option -r"
     [ -z "$MIRROR"  ] || fail "Option -m can't be used together with option -r"
+    [ -z "$TIMEZONE" ] || fail "Option -T can't be used together with option -r"
+    [ -z "$USERPASS" ] || fail "Option -U can't be used together with option -r"
     [ -z "$VERSION" ] || fail "Option -v can't be used together with option -r"
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
     VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
@@ -154,9 +175,21 @@ else
     [ "$ARCH"    ] || ARCH=$(default_arch)
     [ "$BRANCH"  ] || BRANCH=$(default_branch)
     [ "$DESKTOP" ] || DESKTOP=$(default_desktop)
+    [ "$LOCALE"  ] || LOCALE=$DEFAULT_LOCALE
     [ "$MIRROR"  ] || MIRROR=$(default_mirror)
+    [ "$TIMEZONE" ] || TIMEZONE=$DEFAULT_TIMEZONE
+    [ "$USERPASS" ] || USERPASS=$DEFAULT_USERPASS
     [ "$VERSION" ] || VERSION=$(default_version)
 fi
+
+# The value USERPASS bundles two settings: USERNAME and PASSWORD.
+if echo $USERPASS | grep -q ":"; then
+    USERNAME=$(echo $USERPASS | cut -d: -f1)
+    PASSWORD=$(echo $USERPASS | cut -d: -f2-)
+else
+    fail "Invalid value for -U, must be of the form '<username>:<password>'"
+fi
+unset USERPASS
 
 # Order packages alphabetically, separate each package with ", "
 PACKAGES=$(echo $PACKAGES | sed "s/[, ]\+/\n/g" | LC_ALL=C sort -u \
@@ -211,6 +244,9 @@ fi
 [ "$BRANCH"   ] && echo "* branch: $(b $BRANCH)"
 [ "$DESKTOP"  ] && echo "* desktop environment: $(b $DESKTOP)"
 [ "$PACKAGES" ] && echo "* additional packages: $(b $PACKAGES)"
+[ "$LOCALE"   ] && echo "* locale: $(b $LOCALE)"
+[ "$TIMEZONE" ] && echo "* timezone: $(b $TIMEZONE)"
+[ "$USERNAME" ] && echo "* username: $(b $USERNAME)"
 
 # Ask for confirmation before starting the build
 ask_confirmation || fail "Abort."
@@ -230,9 +266,13 @@ if [ $VARIANT = rootfs ]; then
         -t arch:$ARCH \
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
+        -t locale:$LOCALE \
         -t mirror:$MIRROR \
         -t packages:"$PACKAGES" \
+        -t password:"$PASSWORD" \
         -t rootfs:$ROOTFS \
+        -t timezone:$TIMEZONE \
+        -t username:$USERNAME \
         rootfs.yaml
     exit 0
 fi
@@ -260,9 +300,13 @@ else
         -t format:$FORMAT \
         -t imagename:$IMAGE \
         -t keep:$KEEP \
+        -t locale:$LOCALE \
         -t mirror:$MIRROR \
         -t packages:"$PACKAGES" \
+        -t password:"$PASSWORD" \
         -t size:$SIZE \
+        -t timezone:$TIMEZONE \
+        -t username:$USERNAME \
         -t variant:$VARIANT \
         -t zip:$ZIP \
         full.yaml

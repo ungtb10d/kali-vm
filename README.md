@@ -127,11 +127,20 @@ You can install additional packages with the `-p` option. Either use the option
 several times (eg. `-p pkg1 -p pkg2 ...`), or give a comma/space separated
 value (eg. `-p "pkg1,pkg2, pkg3 pkg4"`), or a mix of both.
 
-### Image configuration (not exposed by build.sh yet)
+To set the `locale`, use the option `-L`.  Pick a value in the 1st column of
+`/usr/share/i18n/SUPPORTED`, or check what's configured on your system with
+`grep -v ^# /etc/locale.gen`, or simply `echo $LANG`.
 
-* `locale` pick a value in 1st column of `/usr/share/i18n/SUPPORTED`
-* `timezone` of the form `<dir>/<dir>` taken from `/usr/share/zoneinfo`. In
-  doubt, run `tzselect` to guide you.
+To set the `timezone`, use the option `-T`. Look into `/usr/share/zoneinfo` and
+pick a directory and a sub-directory. In doubt, run `tzselect` to guide you, or
+look at what's configured on your system with `cat /etc/timezone`.
+
+To set the name and password for the unprivileged user, use the option `-U`.
+The value is a single string and the `:` is used to separate the username from
+the password.
+
+Pro tip: you can use `-L $LANG -T $(cat /etc/timezone) -U $USER:$USER` to
+configure the image like your own machine.
 
 ### Caching proxy configuration
 
