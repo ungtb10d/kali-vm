@@ -161,10 +161,5 @@ with `./build.sh -t rootfs`, and then build an image based on this rootfs with
 `./build.sh -r ROOTFS_NAME.tar.gz`. It makes sense if you plan to build several
 image types, for example.
 
-## Known limitations
-
-* Only `amd64` build is supported for now (nothing else was tested).
-* VMware build is not ready yet.
-
 [debos]: https://github.com/go-debos/debos
 [fakemachine]: https://github.com/go-debos/fakemachine
