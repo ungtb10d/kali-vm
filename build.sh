@@ -5,8 +5,8 @@ set -eu
 SUPPORTED_ARCHITECTURES="amd64"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
-SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox"
-SUPPORTED_VARIANTS="generic qemu rootfs virtualbox"
+SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox vmware"
+SUPPORTED_VARIANTS="generic qemu rootfs virtualbox vmware"
 
 SUGGESTED_TYPES="generic-ovf generic-raw qemu rootfs virtualbox"
 
@@ -89,10 +89,11 @@ Supported values for some options:
   TYPE        $SUGGESTED_TYPES
 
 The different types of images that can be built are:
-  generic-ovf Build a $(b sparse VMDK) disk image and a $(b OVF) metadata file.
+  generic-ovf Build a $(b monolithicSparse VMDK) disk image and a $(b OVF) metadata file.
   generic-raw Build a $(b sparse raw) disk image.
   qemu        Build a $(b QCOW2) disk image.
   virtualbox  Build a $(b VDI) disk image and a $(b .vbox) metadata file.
+  vmware      Build a $(b 2GbMaxExtentSparse VMDK) disk image and a $(b VMX) metadata file.
   rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
 
 Supported environment variables:

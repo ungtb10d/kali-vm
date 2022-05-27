@@ -95,13 +95,16 @@ Building a Kali rolling image can be done with:
 
 Different types of images can be built using the option `-t`:
 
-* `generic-ovf`: Build a *sparse VMDK* disk image, along with a *OVF* metadata
-  file. Install virtualization support for QEMU, VirtualBox and VMware.
+* `generic-ovf`: Build a *monolithicSparse VMDK* disk image, along with a *OVF*
+  metadata file. Install virtualization support for QEMU, VirtualBox and
+  VMware.
 * `generic-raw`: Build a *sparse raw* disk image. No metadata file. Install
   virtualization support for QEMU, VirtualBox and VMware.
 * `qemu`: Build a *QCOW2* disk image. Install virtualization support for QEMU.
 * `virtualbox`: Build a *VDI* disk image, along with a *.vbox* metadata file.
   Install virtualization support for VirtualBox.
+* `vmware`: Build a *2GbMaxExtentSparse VMDK* disk image, along with a *.vmx*
+  metadata file.  Install virtualization support for VMware.
 * `rootfs`: Only build and pack the rootfs as a `.tar.gz`. This is not an OS
   image but just a compressed root filesystem. The kernel and bootloader are
   not installed. The main use-case is to reuse it as input to build an OS

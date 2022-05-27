@@ -16,10 +16,10 @@ done
 echo "INFO: Generate $image.vmdk"
 rm -fr $image.vmware && mkdir $image.vmware
 qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse \
-    $image.raw $image.vmware/$image.vmdk
+    $image.raw $image.vmware/$(basename $image).vmdk
 
 echo "INFO: Generate $image.vmx"
-scripts/generate-vmx.sh $image.vmware/$image.vmdk
+scripts/generate-vmx.sh $image.vmware/$(basename $image).vmdk
 
 cd $(dirname $image)
 image=$(basename $image)
