@@ -18,6 +18,7 @@ WELL_KNOWN_PROXIES="\
 ARCH=
 BRANCH=
 DESKTOP=
+KEEP=false
 MIRROR=
 PACKAGES=
 ROOTFS=
@@ -74,6 +75,7 @@ Options:
   -a ARCH     Build an image for this architecture, default: $(default_arch)
   -b BRANCH   Kali branch used to build the image, default: $(default_branch)
   -d DESKTOP  Desktop environment installed in the image, default: $(default_desktop)
+  -k          Keep raw disk image and other intermediary build artifacts
   -m MIRROR   Mirror used to build the image, default: $(default_mirror)
   -p PACKAGES Install extra packages (comma/space separated list)
   -r ROOTFS   Rootfs to use to build the image, default: none
@@ -101,12 +103,13 @@ Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
-while getopts ":a:b:d:hm:p:r:s:t:v:z" opt; do
+while getopts ":a:b:d:hkm:p:r:s:t:v:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
         (d) DESKTOP=$OPTARG ;;
         (h) echo "$USAGE" && exit 0 ;;
+        (k) KEEP=true ;;
         (m) MIRROR=$OPTARG ;;
         (p) PACKAGES="$PACKAGES $OPTARG" ;;
         (r) ROOTFS=$OPTARG ;;
@@ -242,6 +245,7 @@ if [ "$ROOTFS" ]; then
         -t arch:$ARCH \
         -t format:$FORMAT \
         -t imagename:$IMAGE \
+        -t keep:$KEEP \
         -t rootfs:$ROOTFS \
         -t size:$SIZE \
         -t variant:$VARIANT \
@@ -255,6 +259,7 @@ else
         -t desktop:$DESKTOP \
         -t format:$FORMAT \
         -t imagename:$IMAGE \
+        -t keep:$KEEP \
         -t mirror:$MIRROR \
         -t packages:"$PACKAGES" \
         -t size:$SIZE \

@@ -2,11 +2,13 @@
 
 set -eu
 
+keep=0
 image=
 zip=0
 
 while [ $# -gt 0 ]; do
     case $1 in
+        -k) keep=1 ;;
         -z) zip=1 ;;
         *) image=$1 ;;
     esac
@@ -15,6 +17,8 @@ done
 
 echo "INFO: Generate $image.vdi"
 qemu-img convert -O vdi $image.raw $image.vdi
+
+[ $keep -eq 1 ] || rm -f $image.raw
 
 echo "INFO: Generate $image.vbox"
 scripts/generate-vbox.sh $image.vdi
