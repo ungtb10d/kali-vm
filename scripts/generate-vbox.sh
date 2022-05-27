@@ -46,8 +46,8 @@ disk_path=$1
 
 [ ${disk_path##*.} = vdi ] || fail "Invalid input file '$disk_path'"
 
-vbox_template=scripts/templates/vm-definition.vbox
 description_template=scripts/templates/vm-description.txt
+machine_template=scripts/templates/vm-definition.vbox
 
 # Prepare all the values
 
@@ -65,6 +65,9 @@ machine_uuid=$(cat /proc/sys/kernel/random/uuid)
 
 # For OS IDs and types, refer to:
 # https://docs.openlmi.org/en/latest/mof/CIM_SoftwareElement.html
+#
+# The os_type is NOT what's documented in the reference above though,
+# it's what VirtualBox uses internally.
 case $arch in
     amd64)
         long_mode=true
@@ -102,14 +105,14 @@ sed \
     -e "s|%MachineName%|$name|g" \
     -e "s|%MachineUUID%|$machine_uuid|g" \
     -e "s|%OSType%|$os_type|g" \
-    $vbox_template > $output
+    $machine_template > $output
 
 awk -v r="$description" '{ gsub(/%Description%/,r); print }' $output > $output.1
 mv $output.1 $output
 
 unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output || :)
 if [ "$unmatched_patterns" ]; then
-    echo "Some patterns where not replaced in '$output':" >&2
+    echo "Some patterns were not replaced in '$output':" >&2
     echo "$unmatched_patterns" >&2
     exit 1
 fi

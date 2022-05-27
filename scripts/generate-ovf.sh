@@ -71,7 +71,7 @@ disk_path=$1
 [ ${disk_path##*.} = vmdk ] || fail "Invalid input file '$disk_path'"
 
 description_template=scripts/templates/vm-description.txt
-ovf_template=scripts/templates/vm-definition.ovf
+machine_templace=scripts/templates/vm-definition.ovf
 
 # Prepare all the values
 
@@ -101,9 +101,9 @@ vendor_url="https://www.offensive-security.com/"
 # For OS IDs and types, refer to:
 # https://docs.openlmi.org/en/latest/mof/CIM_SoftwareElement.html
 #
-# The os_type is NOT what's documented in the reference above.
-# It's what VirtualBox comes up with when exporting to OVA,
-# and it's a keyword that ends up in <vbox:Machine OSType="xxx">.
+# The os_type is NOT what's documented in the reference above though,
+# it's what VirtualBox uses internally, and it's used in various places
+# in the OVF, notably it's a keyword in <vbox:Machine OSType="xxx">.
 case $arch in
     amd64)
         long_mode=true
@@ -122,8 +122,7 @@ case $arch in
         product_version="$product_version x86"
         ;;
     *)
-        echo "Invalid architecture '$arch'" >&2
-        exit 1
+        fail "Invalid architecture '$arch'"
         ;;
 esac
 
@@ -160,14 +159,14 @@ sed \
     -e "s|%VendorUrl%|$vendor_url|g" \
     -e "s|%VirtualSystemId%|$name|g" \
     -e "s|%VirtualSystemIdentifier%|$name|g" \
-    $ovf_template > $output
+    $machine_templace > $output
 
 awk -v r="$description" '{ gsub(/%Description%/,r); print }' $output > $output.1
 mv $output.1 $output
 
 unmatched_patterns=$(grep -E -n "%[A-Za-z_]+%" $output || :)
 if [ "$unmatched_patterns" ]; then
-    echo "Some patterns where not replaced in '$output':" >&2
+    echo "Some patterns were not replaced in '$output':" >&2
     echo "$unmatched_patterns" >&2
     exit 1
 fi
