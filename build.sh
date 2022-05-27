@@ -30,7 +30,7 @@ default_arch() { echo amd64; }
 default_branch() { echo kali-rolling; }
 default_desktop() { echo xfce; }
 default_mirror() { echo http://http.kali.org/kali; }
-default_version() { echo ${BRANCH#kali-}; }
+default_version() { echo ${BRANCH:-$(default_branch)} | sed "s/^kali-//"; }
 
 fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
