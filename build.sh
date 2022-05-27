@@ -15,7 +15,11 @@ WELL_KNOWN_PROXIES="\
 8000 squid-deb-proxy
 9999 approx"
 
+DEFAULT_ARCH=amd64
+DEFAULT_BRANCH=kali-rolling
+DEFAULT_DESKTOP=xfce
 DEFAULT_LOCALE=en_US.UTF-8
+DEFAULT_MIRROR=http://http.kali.org/kali
 DEFAULT_TIMEZONE=US/Eastern
 DEFAULT_USERPASS=kali:kali
 
@@ -36,11 +40,7 @@ USERPASS=
 VERSION=
 ZIP=false
 
-default_arch() { echo amd64; }
-default_branch() { echo kali-rolling; }
-default_desktop() { echo xfce; }
-default_mirror() { echo http://http.kali.org/kali; }
-default_version() { echo ${BRANCH:-$(default_branch)} | sed "s/^kali-//"; }
+default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
 fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
@@ -81,11 +81,11 @@ USAGE="Usage: $(basename $0) [<option>...]
 Build a Kali Linux OS image.
 
 Options:
-  -a ARCH     Build an image for this architecture, default: $(default_arch)
-  -b BRANCH   Kali branch used to build the image, default: $(default_branch)
-  -d DESKTOP  Desktop environment installed in the image, default: $(default_desktop)
+  -a ARCH     Build an image for this architecture, default: $DEFAULT_ARCH
+  -b BRANCH   Kali branch used to build the image, default: $DEFAULT_BRANCH
+  -d DESKTOP  Desktop environment installed in the image, default: $DEFAULT_DESKTOP
   -k          Keep raw disk image and other intermediary build artifacts
-  -m MIRROR   Mirror used to build the image, default: $(default_mirror)
+  -m MIRROR   Mirror used to build the image, default: $DEFAULT_MIRROR
   -p PACKAGES Install extra packages (comma/space separated list)
   -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image in GB, default: $SIZE
@@ -172,11 +172,11 @@ if [ "$ROOTFS" ]; then
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
     VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
 else
-    [ "$ARCH"    ] || ARCH=$(default_arch)
-    [ "$BRANCH"  ] || BRANCH=$(default_branch)
-    [ "$DESKTOP" ] || DESKTOP=$(default_desktop)
+    [ "$ARCH"    ] || ARCH=$DEFAULT_ARCH
+    [ "$BRANCH"  ] || BRANCH=$DEFAULT_BRANCH
+    [ "$DESKTOP" ] || DESKTOP=$DEFAULT_DESKTOP
     [ "$LOCALE"  ] || LOCALE=$DEFAULT_LOCALE
-    [ "$MIRROR"  ] || MIRROR=$(default_mirror)
+    [ "$MIRROR"  ] || MIRROR=$DEFAULT_MIRROR
     [ "$TIMEZONE" ] || TIMEZONE=$DEFAULT_TIMEZONE
     [ "$USERPASS" ] || USERPASS=$DEFAULT_USERPASS
     [ "$VERSION" ] || VERSION=$(default_version)
