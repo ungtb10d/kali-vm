@@ -15,11 +15,11 @@ get_vdi_disk_uuid() {
     local disk=$1
     local p1= p2= p3= p4= p5=
 
-    p1=$(od -A n -t x4 -j 0x188 -N 4 $disk | tr -d " ")
-    p2=$(od -A n -t x2 -j 0x18c -N 2 $disk | tr -d " ")
-    p3=$(od -A n -t x2 -j 0x18e -N 2 $disk | tr -d " ")
-    p4=$(od -A n -t x2 -j 0x190 -N 2 --endian=big $disk | tr -d " ")
-    p5=$(od -A n -t x2 -j 0x192 -N 6 --endian=big $disk | tr -d " ")
+    p1=$(od -An -tx4 -j 0x188 -N4 $disk | tr -d " ")
+    p2=$(od -An -tx2 -j 0x18c -N2 $disk | tr -d " ")
+    p3=$(od -An -tx2 -j 0x18e -N2 $disk | tr -d " ")
+    p4=$(od -An -tx2 -j 0x190 -N2 --endian=big $disk | tr -d " ")
+    p5=$(od -An -tx2 -j 0x192 -N6 --endian=big $disk | tr -d " ")
 
     echo $p1-$p2-$p3-$p4-$p5
 }
@@ -33,7 +33,7 @@ gen_vbox_mac_address() {
     local p1= p2=
 
     p1=080027
-    p2=$(od -A n -t x1 -N 3 /dev/urandom | tr "[a-z]" "[A-Z]" | tr -d " ")
+    p2=$(od -An -tx1 -N3 /dev/urandom | tr "[a-z]" "[A-Z]" | tr -d " ")
 
     echo $p1$p2
 }
