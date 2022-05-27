@@ -2,7 +2,7 @@
 
 set -eu
 
-SUPPORTED_ARCHITECTURES="amd64"
+SUPPORTED_ARCHITECTURES="amd64 i386"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="gnome i3 kde xfce"
 SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox vmware"
