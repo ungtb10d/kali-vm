@@ -8,7 +8,7 @@ SUPPORTED_DESKTOPS="e17 gnome i3 kde lxde mate xfce"
 SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox vmware"
 SUPPORTED_VARIANTS="generic qemu rootfs virtualbox vmware"
 
-SUGGESTED_TYPES="generic-ovf generic-raw qemu rootfs virtualbox"
+SUGGESTED_TYPES="generic-ova generic-ovf generic-raw qemu rootfs virtualbox vmware"
 
 WELL_KNOWN_PROXIES="\
 3142 apt-cacher-ng
