@@ -88,13 +88,14 @@ Supported values for some options:
   DESKTOP     $SUPPORTED_DESKTOPS
   TYPE        $SUGGESTED_TYPES
 
-The different types of images that can be built are:
-  generic-ovf Build a $(b monolithicSparse VMDK) disk image and a $(b OVF) metadata file.
-  generic-raw Build a $(b sparse raw) disk image.
-  qemu        Build a $(b QCOW2) disk image.
-  virtualbox  Build a $(b VDI) disk image and a $(b .vbox) metadata file.
-  vmware      Build a $(b 2GbMaxExtentSparse VMDK) disk image and a $(b VMX) metadata file.
-  rootfs      Build a rootfs (no bootloader/kernel), pack it in a $(b .tar.gz) archive.
+The different types of images that can be built:
+  generic-ova $(b streamOptimized VMDK) disk image, $(b OVF) metadata file, packed in a $(b OVA) archive
+  generic-ovf $(b monolithicSparse VMDK) disk image, $(b OVF) metadata file
+  generic-raw $(b sparse raw) disk image
+  qemu        $(b QCOW2) disk image
+  virtualbox  $(b VDI) disk image, $(b .vbox) metadata file
+  vmware      $(b 2GbMaxExtentSparse VMDK) disk image, $(b VMX) metadata file
+  rootfs      A root filesystem (no bootloader/kernel), packed in a $(b .tar.gz) archive
 
 Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.

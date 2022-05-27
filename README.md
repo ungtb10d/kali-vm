@@ -79,7 +79,7 @@ $ ./build-in-container.sh
 Use either `build.sh` or `build-in-container.sh`, at your preference. From
 this point we'll use `build.sh` for brevity.
 
-The best starting point, as always, is to show the usage message:
+The best starting point, as always, is the usage message:
 
 ```
 ./build.sh -h
@@ -93,22 +93,33 @@ Building a Kali rolling image can be done with:
 
 ### Types of build
 
-Different types of images can be built using the option `-t`:
+Different types of images can be built using the option `-t`. The image type
+decides what virtualization support is installed in the image, and the format
+to use to export the image.
 
-* `generic-ovf`: Build a *monolithicSparse VMDK* disk image, along with a *OVF*
-  metadata file. Install virtualization support for QEMU, VirtualBox and
-  VMware.
-* `generic-raw`: Build a *sparse raw* disk image. No metadata file. Install
-  virtualization support for QEMU, VirtualBox and VMware.
-* `qemu`: Build a *QCOW2* disk image. Install virtualization support for QEMU.
-* `virtualbox`: Build a *VDI* disk image, along with a *.vbox* metadata file.
-  Install virtualization support for VirtualBox.
-* `vmware`: Build a *2GbMaxExtentSparse VMDK* disk image, along with a *.vmx*
-  metadata file.  Install virtualization support for VMware.
-* `rootfs`: Only build and pack the rootfs as a `.tar.gz`. This is not an OS
-  image but just a compressed root filesystem. The kernel and bootloader are
-  not installed. The main use-case is to reuse it as input to build an OS
-  image.
+| image type  | disk format             | metadata | container |
+| ----------- | ----------------------- | -------- | --------- |
+| generic-ova |    streamOptimized VMDK |      OVF |       OVA |
+| generic-ovf |   monolithicSparse VMDK |      OVF |           |
+| generic-raw |       raw (sparse file) |     none |           |
+| qemu        |                   QCOW2 |     none |           |
+| virtualbox  |                     VDI |     VBOX |           |
+| vmware      | 2GbMaxExtentSparse VMDK |      VMX |           |
+
+The `generic-*` images come with virtualization support packages pre-installed
+for QEMU, VirtualBox and VMware, hence the name "generic". While other images,
+that target a specific VM engine, only come with support for this particular
+virtualization engine.
+
+Only the image `generic-ova` defines a container: the result of the build is a
+`.ova` file, which is simply a tar archive. For other image types, the build
+produce separate files. They can be bundled together in a 7z archive with the
+option `-z`.
+
+There is also a `rootfs` type: this is not an image. It's simply a Kali Linux
+root filesystem tree, without the kernel and the bootloader, and packed in a
+`.tar.gz` archive. The main use-case is to reuse it as input to build an OS
+image.
 
 ### Additional configuration
 
