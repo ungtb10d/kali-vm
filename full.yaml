@@ -83,15 +83,13 @@ actions:
       #- kali-desktop-{{ $desktop }}
       - kali-desktop-{{ $desktop }}
       - kali-linux-core
+
+  - description: "Install tools"
+    action: apt
+    recommends: true
+    packages:
       - kali-linux-default
       - kali-tools-top10
-
-#  - action: apt
-#    description: "Install tools"
-#    recommends: true
-#    packages:
-#      - kali-linux-default
-#      - kali-tools-top10
 
 #  - action: run
 #    description: "HACK - Make package list identical compared to current VM images"
