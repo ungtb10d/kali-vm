@@ -174,5 +174,19 @@ with `./build.sh -t rootfs`, and then build an image based on this rootfs with
 `./build.sh -r ROOTFS_NAME.tar.gz`. It makes sense if you plan to build several
 image types, for example.
 
+## Troubleshooting
+
+### Not enough memory
+
+When the scratch area gets full (ie. the `--scratchsize` value is too low), the
+build might fail with this kind of error messages:
+
+```
+[...]: failed to write (No space left on device)
+[...]: Cannot write: No space left on device
+```
+
+Solution: bump the value of `--scratchsize` in the `build.sh` script.
+
 [debos]: https://github.com/go-debos/debos
 [fakemachine]: https://github.com/go-debos/fakemachine

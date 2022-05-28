@@ -255,13 +255,15 @@ fi
 # Ask for confirmation before starting the build
 ask_confirmation || fail "Abort."
 
-# XXX Size required shouldn't change, but user should be allowed to decide
-# whether they want to use RAM or DISK . Default should be disk, while RAM
-# shouldn't be allowed if not enough free RAM.
+# Notes regarding the scratch size needed to build a Kali image from scratch
+# (ie. in one step, no intermediary rootfs), kali-rolling branch and xfce
+# desktop, back in June 2022.
+# * standard toolset  : 14G
+# * large toolset     : 24G
+# * everything toolset: 40G
+OPTS="-m 4G --scratchsize=45G"
 
 mkdir -p images
-
-OPTS="-m 4G --scratchsize=16G"
 
 if [ $VARIANT = rootfs ]; then
     echo "Building rootfs from recipe $(b rootfs.yaml) ..."
