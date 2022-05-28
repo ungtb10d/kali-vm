@@ -1,17 +1,17 @@
 {{ $arch := .arch }}
 {{ $branch := .branch }}
-{{ $desktop := .desktop }}
 {{ $format := .format }}
 {{ $imagename := .imagename }}
 {{ $keep := .keep }}
 {{ $mirror := .mirror }}
-{{ $packages := .packages }}
 {{ $size := .size }}
 {{ $variant := .variant }}
 {{ $zip := .zip }}
 
+{{ $desktop := .desktop }}
 {{ $locale := .locale }}
 {{ $password := .password }}
+{{ $packages := .packages }}
 {{ $timezone := .timezone }}
 {{ $username := .username }}
 
@@ -98,12 +98,12 @@ actions:
 #    chroot: true
 #    script: scripts/hack-tidy-up-packages
 
-{{ if ne $packages "" }}
+  {{ if ne $packages "" }}
   - description: "Install extra packages: {{ $packages }}"
     action: apt
     recommends: true
     packages: [ {{ $packages }} ]
-{{ end }}
+  {{ end }}
 
   - action: overlay
     source: overlays/loopback-interface
