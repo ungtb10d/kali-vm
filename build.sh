@@ -180,36 +180,30 @@ else
     [ "$TIMEZONE" ] || TIMEZONE=$DEFAULT_TIMEZONE
     [ "$USERPASS" ] || USERPASS=$DEFAULT_USERPASS
     [ "$VERSION" ] || VERSION=$(default_version)
-fi
-
-# The value USERPASS bundles two settings: USERNAME and PASSWORD.
-if echo $USERPASS | grep -q ":"; then
+    # Validate some options
+    echo $SUPPORTED_BRANCHES | grep -qw $BRANCH \
+        || fail "Unsupported branch '$BRANCH'"
+    echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
+        || fail "Unsupported desktop '$DESKTOP'"
+    # Unpack USERPASS to USERNAME and PASSWORD
+    echo $USERPASS | grep -q ":" \
+        || fail "Invalid value for -U, must be of the form '<username>:<password>'"
     USERNAME=$(echo $USERPASS | cut -d: -f1)
     PASSWORD=$(echo $USERPASS | cut -d: -f2-)
-else
-    fail "Invalid value for -U, must be of the form '<username>:<password>'"
 fi
 unset USERPASS
 
-# Order packages alphabetically, separate each package with ", "
-PACKAGES=$(echo $PACKAGES | sed "s/[, ]\+/\n/g" | LC_ALL=C sort -u \
-    | awk 'ORS=", "' | sed "s/[, ]*$//")
+# Validate architecture
+echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
+    || fail "Unsupported architecture '$ARCH'"
 
 # Validate size and add the "GB" suffix
 [[ $SIZE =~ ^[0-9]+$ ]] && SIZE=${SIZE}GB \
     || fail "Size must be given in GB and must contain only digits"
 
-# Validate some options
-echo $SUPPORTED_ARCHITECTURES | grep -qw $ARCH \
-    || fail "Unsupported architecture '$ARCH'"
-if [ "$BRANCH" ]; then
-    echo $SUPPORTED_BRANCHES | grep -qw $BRANCH \
-        || fail "Unsupported branch '$BRANCH'"
-fi
-if [ "$DESKTOP" ]; then
-    echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
-        || fail "Unsupported desktop '$DESKTOP'"
-fi
+# Order packages alphabetically, separate each package with ", "
+PACKAGES=$(echo $PACKAGES | sed "s/[, ]\+/\n/g" | LC_ALL=C sort -u \
+    | awk 'ORS=", "' | sed "s/[, ]*$//")
 
 # Attempt to detect well-known http caching proxies on localhost,
 # cf. bash(1) section "REDIRECTION". This is not bullet-proof.
