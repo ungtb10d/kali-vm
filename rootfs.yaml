@@ -105,6 +105,7 @@ actions:
     source: overlays/loopback-interface
 
   - description: "Create user {{ $username }}"
+    label: "create-user.sh {{ $username }} ****"
     action: run
     chroot: true
     script: scripts/create-user.sh {{ $username }} "{{ $password }}"
