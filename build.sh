@@ -5,9 +5,10 @@ set -eu
 SUPPORTED_ARCHITECTURES="amd64 i386"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="e17 gnome i3 kde lxde mate xfce"
+SUPPORTED_TOOLSETS="default everything large none"
+
 SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox vmware"
 SUPPORTED_VARIANTS="generic qemu rootfs virtualbox vmware"
-
 SUGGESTED_TYPES="generic-ova generic-ovf generic-raw qemu rootfs virtualbox vmware"
 
 WELL_KNOWN_PROXIES="\
@@ -21,6 +22,7 @@ DEFAULT_DESKTOP=xfce
 DEFAULT_LOCALE=en_US.UTF-8
 DEFAULT_MIRROR=http://http.kali.org/kali
 DEFAULT_TIMEZONE=US/Eastern
+DEFAULT_TOOLSET=default
 DEFAULT_USERPASS=kali:kali
 
 ARCH=
@@ -95,6 +97,7 @@ Customization options:
   -D DESKTOP  Desktop environment installed in the image, default: $DEFAULT_DESKTOP
   -L LOCALE   Set locale, default: $DEFAULT_LOCALE
   -P PACKAGES Install extra packages (comma/space separated list)
+  -S TOOLSET  The selection of tools to include in the image, default: $DEFAULT_TOOLSET
   -T TIMEZONE Set timezone, default: $DEFAULT_TIMEZONE
   -U USERPASS Username and password, separated by a colon, default: $DEFAULT_USERPASS
 
@@ -102,6 +105,7 @@ Supported values for some options:
   ARCH        $SUPPORTED_ARCHITECTURES
   BRANCH      $SUPPORTED_BRANCHES
   DESKTOP     $SUPPORTED_DESKTOPS
+  TOOLSET     $SUPPORTED_TOOLSETS
   TYPE        $SUGGESTED_TYPES
 
 The different types of images that can be built:
@@ -117,7 +121,7 @@ Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
 "
 
-while getopts ":a:b:D:hkL:m:P:r:s:t:T:U:v:z" opt; do
+while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:v:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
@@ -129,6 +133,7 @@ while getopts ":a:b:D:hkL:m:P:r:s:t:T:U:v:z" opt; do
         (P) PACKAGES="$PACKAGES $OPTARG" ;;
         (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
+        (S) TOOLSET=$OPTARG ;;
         (t) TYPE=$OPTARG ;;
         (T) TIMEZONE=$OPTARG ;;
         (U) USERPASS=$OPTARG ;;
@@ -167,6 +172,7 @@ if [ "$ROOTFS" ]; then
     [ -z "$LOCALE"  ] || fail "Option -L can't be used together with option -r"
     [ -z "$MIRROR"  ] || fail "Option -m can't be used together with option -r"
     [ -z "$TIMEZONE" ] || fail "Option -T can't be used together with option -r"
+    [ -z "$TOOLSET"  ] || fail "Option -S can't be used together with option -r"
     [ -z "$USERPASS" ] || fail "Option -U can't be used together with option -r"
     [ -z "$VERSION" ] || fail "Option -v can't be used together with option -r"
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
@@ -178,6 +184,7 @@ else
     [ "$LOCALE"  ] || LOCALE=$DEFAULT_LOCALE
     [ "$MIRROR"  ] || MIRROR=$DEFAULT_MIRROR
     [ "$TIMEZONE" ] || TIMEZONE=$DEFAULT_TIMEZONE
+    [ "$TOOLSET"  ] || TOOLSET=$DEFAULT_TOOLSET
     [ "$USERPASS" ] || USERPASS=$DEFAULT_USERPASS
     [ "$VERSION" ] || VERSION=$(default_version)
     # Validate some options
@@ -185,6 +192,8 @@ else
         || fail "Unsupported branch '$BRANCH'"
     echo $SUPPORTED_DESKTOPS | grep -qw $DESKTOP \
         || fail "Unsupported desktop '$DESKTOP'"
+    echo $SUPPORTED_TOOLSETS | grep -qw $TOOLSET \
+        || fail "Unsupported toolset '$TOOLSET'"
     # Unpack USERPASS to USERNAME and PASSWORD
     echo $USERPASS | grep -q ":" \
         || fail "Invalid value for -U, must be of the form '<username>:<password>'"
@@ -237,6 +246,7 @@ fi
 [ "$MIRROR"   ] && echo "* mirror: $(b $MIRROR)"
 [ "$BRANCH"   ] && echo "* branch: $(b $BRANCH)"
 [ "$DESKTOP"  ] && echo "* desktop environment: $(b $DESKTOP)"
+[ "$TOOLSET"  ] && echo "* tool selection: $(b $TOOLSET)"
 [ "$PACKAGES" ] && echo "* additional packages: $(b $PACKAGES)"
 [ "$LOCALE"   ] && echo "* locale: $(b $LOCALE)"
 [ "$TIMEZONE" ] && echo "* timezone: $(b $TIMEZONE)"
@@ -266,6 +276,7 @@ if [ $VARIANT = rootfs ]; then
         -t password:"$PASSWORD" \
         -t rootfs:$ROOTFS \
         -t timezone:$TIMEZONE \
+        -t toolset:$TOOLSET \
         -t username:$USERNAME \
         rootfs.yaml
     exit 0
@@ -300,6 +311,7 @@ else
         -t password:"$PASSWORD" \
         -t size:$SIZE \
         -t timezone:$TIMEZONE \
+        -t toolset:$TOOLSET \
         -t username:$USERNAME \
         -t variant:$VARIANT \
         -t zip:$ZIP \

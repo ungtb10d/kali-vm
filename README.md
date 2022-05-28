@@ -123,7 +123,9 @@ image.
 
 ### Additional configuration
 
-You can choose the desktop environment with the `-D` option.
+You can choose the desktop environment with the `-D` option. You can also
+change the default selection of tools included in the image with the `-S`
+option.
 
 You can install additional packages with the `-P` option. Either use the option
 several times (eg. `-P pkg1 -P pkg2 ...`), or give a comma/space separated
