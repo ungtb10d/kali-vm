@@ -77,8 +77,12 @@ actions:
       #- kali-linux-core
       #- kali-desktop-core
       #- kali-desktop-{{ $desktop }}
-      - kali-desktop-{{ $desktop }}
       - kali-linux-core
+  {{ if eq $desktop "headless" }}
+      - kali-linux-headless
+  {{ else }}
+      - kali-desktop-{{ $desktop }}
+  {{ end }}
 
   {{ if ne $toolset "none" }}
   - description: "Install tool selection: {{ $toolset }}"

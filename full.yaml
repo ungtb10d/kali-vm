@@ -82,8 +82,12 @@ actions:
       #- kali-linux-core
       #- kali-desktop-core
       #- kali-desktop-{{ $desktop }}
-      - kali-desktop-{{ $desktop }}
       - kali-linux-core
+  {{ if eq $desktop "headless" }}
+      - kali-linux-headless
+  {{ else }}
+      - kali-desktop-{{ $desktop }}
+  {{ end }}
 
   {{ if ne $toolset "none" }}
   - description: "Install tool selection: {{ $toolset }}"
@@ -160,17 +164,9 @@ actions:
     command: update-grub && grub-install "$IMAGE"
 
   - description: "Install virtualization support for {{ $variant }}"
-    action: apt
-    recommends: true
-  {{ if eq $variant "qemu" }}
-    packages: [ qemu-guest-agent, spice-vdagent ]
-  {{ else if eq $variant "virtualbox" }}
-    packages: [ virtualbox-guest-x11 ]
-  {{ else if eq $variant "vmware" }}
-    packages: [ open-vm-tools-desktop ]
-  {{ else if eq $variant "generic" }}
-    packages: [ open-vm-tools-desktop, qemu-guest-agent, spice-vdagent, virtualbox-guest-x11 ]
-  {{ end }}
+    action: run
+    chroot: true
+    script: scripts/install-virt-support.sh {{ $variant }}
 
   {{ if eq $variant "vmware" }}
   - description: "Finish install for {{ $variant }}"

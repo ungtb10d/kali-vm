@@ -4,7 +4,7 @@ set -eu
 
 SUPPORTED_ARCHITECTURES="amd64 i386"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
-SUPPORTED_DESKTOPS="e17 gnome i3 kde lxde mate xfce"
+SUPPORTED_DESKTOPS="e17 gnome headless i3 kde lxde mate xfce"
 SUPPORTED_TOOLSETS="default everything large none"
 
 SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox vmware"
@@ -43,6 +43,7 @@ USERPASS=
 VERSION=
 ZIP=false
 
+default_toolset() { [ ${DESKTOP:-$DEFAULT_DESKTOP} = headless ] && echo none || echo default; }
 default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
 fail() { echo "$@" >&2; exit 1; }
@@ -98,7 +99,7 @@ Customization options:
   -D DESKTOP  Desktop environment installed in the image, default: $DEFAULT_DESKTOP
   -L LOCALE   Set locale, default: $DEFAULT_LOCALE
   -P PACKAGES Install extra packages (comma/space separated list)
-  -S TOOLSET  The selection of tools to include in the image, default: $DEFAULT_TOOLSET
+  -S TOOLSET  The selection of tools to include in the image, default: $(default_toolset)
   -T TIMEZONE Set timezone, default: $DEFAULT_TIMEZONE
   -U USERPASS Username and password, separated by a colon, default: $DEFAULT_USERPASS
 
@@ -185,7 +186,7 @@ else
     [ "$LOCALE"  ] || LOCALE=$DEFAULT_LOCALE
     [ "$MIRROR"  ] || MIRROR=$DEFAULT_MIRROR
     [ "$TIMEZONE" ] || TIMEZONE=$DEFAULT_TIMEZONE
-    [ "$TOOLSET"  ] || TOOLSET=$DEFAULT_TOOLSET
+    [ "$TOOLSET"  ] || TOOLSET=$(default_toolset)
     [ "$USERPASS" ] || USERPASS=$DEFAULT_USERPASS
     [ "$VERSION" ] || VERSION=$(default_version)
     # Validate some options
