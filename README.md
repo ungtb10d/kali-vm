@@ -74,10 +74,10 @@ $ ./build-in-container.sh
 
 ## Building an image
 
-### Get started
-
 Use either `build.sh` or `build-in-container.sh`, at your preference. From
 this point we'll use `build.sh` for brevity.
+
+### Examples
 
 The best starting point, as always, is the usage message:
 
@@ -85,17 +85,48 @@ The best starting point, as always, is the usage message:
 ./build.sh -h
 ```
 
-Building a Kali rolling image can be done with:
+Building a Kali rolling image, default desktop, default toolset. Don't export
+it to any format, just build a raw disk image, ie. a plain binary image of the
+disk. This image can be started with QEMU.
 
 ```
 ./build.sh
 ```
 
+Build the last stable release of Kali, and export it for VMware. Install the
+GNOME desktop environment, rather than the default XFCE.
+
+```
+./build.sh -t vmware -b kali-last-snapshot -D gnome
+```
+
+Build the Kali Linux everything image, and give it a 150 GB disk. Export it for
+VirtualBox.
+
+```
+./build.sh -t virtualbox -S everything -s 150
+```
+
+Build a light Kali image: no desktop environment and no default toolset. Export
+it to the OVA format, suitable for both VMware and VirtualBox.  Also install
+the package `metasploit-framework`.
+
+```
+./build.sh -t generic-ova -D headless -P metasploit-framework
+```
+
+Build a Kali rolling image, and configure it to mimic the host system: same
+username, same locale and same timezone.
+
+```
+./build.sh -L $LANG -T $(cat /etc/timezone) -U $USER:'s3cr3t!p4ssw0rd'
+```
+
 ### Types of build
 
 Different types of images can be built using the option `-t`. The image type
-decides what virtualization support is installed in the image, and the format
-to use to export the image.
+decides what virtualization support is installed in the image, and in what
+format the image will be exported to.
 
 | image type  | disk format             | metadata | container |
 | ----------- | ----------------------- | -------- | --------- |

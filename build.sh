@@ -46,8 +46,8 @@ ZIP=false
 default_toolset() { [ ${DESKTOP:-$DEFAULT_DESKTOP} = headless ] && echo none || echo default; }
 default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
-fail() { echo "$@" >&2; exit 1; }
 b() { tput bold; echo -n "$@"; tput sgr0; }
+fail() { echo "$@" >&2; exit 1; }
 
 ask_confirmation() {
     local question=${1:-"Do you want to continue?"}
@@ -85,42 +85,41 @@ USAGE="Usage: $(basename $0) [<option>...]
 Build a Kali Linux OS image.
 
 Build options:
-  -a ARCH     Build an image for this architecture, default: $DEFAULT_ARCH
-  -b BRANCH   Kali branch used to build the image, default: $DEFAULT_BRANCH
+  -a ARCH     Build an image for this architecture, default: $(b $DEFAULT_ARCH)
+              Supported values: $SUPPORTED_ARCHITECTURES
+  -b BRANCH   Kali branch used to build the image, default: $(b $DEFAULT_BRANCH)
+              Supported values: $SUPPORTED_BRANCHES
   -k          Keep raw disk image and other intermediary build artifacts
-  -m MIRROR   Mirror used to build the image, default: $DEFAULT_MIRROR
-  -r ROOTFS   Rootfs to use to build the image, default: none
-  -s SIZE     Size of the disk image in GB, default: $SIZE
-  -t TYPE     Type of image to build (see below for details), default: $TYPE
-  -v VERSION  Release version of Kali, default: $(default_version)
+  -m MIRROR   Mirror used to build the image, default: $(b $DEFAULT_MIRROR)
+  -r ROOTFS   Rootfs to use to build the image, default: $(b none)
+  -s SIZE     Size of the disk image in GB, default: $(b $SIZE)
+  -t TYPE     Type of image to build (see below for details), default: $(b $TYPE)
+              Supported values: $SUGGESTED_TYPES
   -z          Zip images and metadata files after the build
 
 Customization options:
-  -D DESKTOP  Desktop environment installed in the image, default: $DEFAULT_DESKTOP
-  -L LOCALE   Set locale, default: $DEFAULT_LOCALE
+  -D DESKTOP  Desktop environment installed in the image, default: $(b $DEFAULT_DESKTOP)
+              Supported values: $SUPPORTED_DESKTOPS
+  -L LOCALE   Set locale, default: $(b $DEFAULT_LOCALE)
   -P PACKAGES Install extra packages (comma/space separated list)
-  -S TOOLSET  The selection of tools to include in the image, default: $(default_toolset)
-  -T TIMEZONE Set timezone, default: $DEFAULT_TIMEZONE
-  -U USERPASS Username and password, separated by a colon, default: $DEFAULT_USERPASS
-
-Supported values for some options:
-  ARCH        $SUPPORTED_ARCHITECTURES
-  BRANCH      $SUPPORTED_BRANCHES
-  DESKTOP     $SUPPORTED_DESKTOPS
-  TOOLSET     $SUPPORTED_TOOLSETS
-  TYPE        $SUGGESTED_TYPES
+  -S TOOLSET  The selection of tools to include in the image, default: $(b $(default_toolset))
+              Supported values: $SUPPORTED_TOOLSETS
+  -T TIMEZONE Set timezone, default: $(b $DEFAULT_TIMEZONE)
+  -U USERPASS Username and password, separated by a colon, default: $(b $DEFAULT_USERPASS)
 
 The different types of images that can be built:
-  generic-ova $(b streamOptimized VMDK) disk image, $(b OVF) metadata file, packed in a $(b OVA) archive
-  generic-ovf $(b monolithicSparse VMDK) disk image, $(b OVF) metadata file
-  generic-raw $(b sparse raw) disk image
-  qemu        $(b QCOW2) disk image
-  virtualbox  $(b VDI) disk image, $(b .vbox) metadata file
-  vmware      $(b 2GbMaxExtentSparse VMDK) disk image, $(b VMX) metadata file
-  rootfs      A root filesystem (no bootloader/kernel), packed in a $(b .tar.gz) archive
+  generic-ova streamOptimized VMDK disk image, OVF metadata file, packed in a OVA archive
+  generic-ovf monolithicSparse VMDK disk image, OVF metadata file
+  generic-raw sparse raw disk image
+  qemu        QCOW2 disk image
+  virtualbox  VDI disk image, .vbox metadata file
+  vmware      2GbMaxExtentSparse VMDK disk image, VMX metadata file
+  rootfs      A root filesystem (no bootloader/kernel), packed in a .tar.gz archive
 
 Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
+
+Refer to the README for examples.
 "
 
 while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:v:z" opt; do
