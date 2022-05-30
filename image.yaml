@@ -84,6 +84,13 @@ actions:
     chroot: false
     script: scripts/cleanup-out.sh
 
+  {{ if eq $zip "true" }}
+  - description: "Fill unallocated blocks with zeroes"
+    action: run
+    chroot: false
+    script: scripts/zerofree.sh $IMAGE-part1
+  {{ end }}
+
   - description: "Export to a {{ $format }} image"
     label: "export-{{ $format }}"
     action: run

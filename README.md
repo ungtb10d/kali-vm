@@ -41,7 +41,7 @@ If building straight from your machine, you'll need to install `debos` and a
 little more:
 
 ```
-sudo apt install debos p7zip qemu-utils
+sudo apt install debos p7zip qemu-utils zerofree
 ```
 
 Then use the script `build.sh` to build an image.
