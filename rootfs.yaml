@@ -93,11 +93,6 @@ actions:
       - kali-tools-top10
   {{ end }}
 
-#  - action: run
-#    description: "HACK - Make package list identical compared to current VM images"
-#    chroot: true
-#    script: scripts/hack-tidy-up-packages
-
   {{ if ne $packages "" }}
   - description: "Install extra packages: {{ $packages }}"
     action: apt
