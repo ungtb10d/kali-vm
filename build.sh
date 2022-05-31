@@ -2,6 +2,11 @@
 
 set -eu
 
+WELL_KNOWN_CACHING_PROXIES="\
+3142 apt-cacher-ng
+8000 squid-deb-proxy
+9999 approx"
+
 SUPPORTED_ARCHITECTURES="amd64 i386"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="e17 gnome headless i3 kde lxde mate xfce"
@@ -10,11 +15,6 @@ SUPPORTED_TOOLSETS="default everything large none"
 SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox vmware"
 SUPPORTED_VARIANTS="generic qemu rootfs virtualbox vmware"
 SUGGESTED_TYPES="generic-ova generic-ovf generic-raw qemu rootfs virtualbox vmware"
-
-WELL_KNOWN_PROXIES="\
-3142 apt-cacher-ng
-8000 squid-deb-proxy
-9999 approx"
 
 DEFAULT_ARCH=amd64
 DEFAULT_BRANCH=kali-rolling
@@ -224,7 +224,7 @@ if ! [ -v http_proxy ]; then
         echo "Detected caching proxy $(b $proxy) on port $(b $port)."
         export http_proxy="http://10.0.2.2:$port"
         break
-    done <<< "$WELL_KNOWN_PROXIES"
+    done <<< "$WELL_KNOWN_CACHING_PROXIES"
 fi
 if [ "${http_proxy:-}" ]; then
     echo "Using a proxy via env variable: $(b http_proxy=$http_proxy)."
