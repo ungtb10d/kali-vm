@@ -20,6 +20,9 @@ cd $(dirname $image)
 image=$(basename $image)
 
 if [ $zip -eq 1 ]; then
+    echo "INFO: Dig holes in the sparse file"
+    fallocate -v --dig-holes $image.img
+
     echo "INFO: Create bmap file $image.img.bmap"
     bmaptool create $image.img > $image.img.bmap
 
