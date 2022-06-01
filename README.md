@@ -217,7 +217,15 @@ build might fail with this kind of error messages:
 [...]: Cannot write: No space left on device
 ```
 
-Solution: bump the value of `--scratchsize` in the `build.sh` script.
+Solution: bump the value of `--scratchsize`. You can pass arguments to debos
+after the special character `--`, so if you need for example 50G, you can do
+`./build.sh [...] -- --scratchsize=50G`.
+
+### Get a shell in the VM when the build fails
+
+When debugging build failures, it's convenient to be dropped in a shell within
+the VM where the build takes place. This is possible by giving the option
+`--debug-shell` to debos: `./build.sh [...] -- --debug-shell`.
 
 [debos]: https://github.com/go-debos/debos
 [fakemachine]: https://github.com/go-debos/fakemachine

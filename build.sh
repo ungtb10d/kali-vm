@@ -297,19 +297,21 @@ fi
 ask_confirmation || fail "Abort."
 
 # Notes regarding the scratch size needed to build a Kali image from scratch
-# (ie. in one step, no intermediary rootfs), kali-rolling branch and xfce
-# desktop, back in June 2022.
-# * standard toolset  : 14G
-# * large toolset     : 24G
-# * everything toolset: 40G
-OPTS="-m 4G --scratchsize=45G"
+# (ie. in one step, no intermediary rootfs), using the kali-rolling branch and
+# xfce desktop, and changing only the toolset. Default toolset needs 14G,
+# large toolset 24G and everything toolset 40G. That was back in June 2022.
+# Now set default debos options, unless user passed it explicitly after '--'.
+echo "$@" | grep -q -e "-m[= ]" -e "--memory[= ]" \
+    || set -- "$@" --memory=4G
+echo "$@" | grep -q -e "--scratchsize[= ]" \
+    || set -- "$@" --scratchsize=45G
 
 mkdir -p $OUTDIR
 
 if [ $VARIANT = rootfs ]; then
     echo "Building rootfs from recipe $(b rootfs.yaml) ..."
     OUTPUT=$OUTDIR/rootfs-$VERSION-$ARCH.tar.gz
-    debos $OPTS \
+    debos "$@" \
         -t arch:$ARCH \
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
@@ -325,7 +327,7 @@ if [ $VARIANT = rootfs ]; then
 elif [ "$ROOTFS" ]; then
     echo "Building image from recipe $(b image.yaml) ..."
     OUTPUT=$OUTDIR/kali-linux-$VERSION-$VARIANT-$ARCH
-    debos $OPTS \
+    debos "$@" \
         -t arch:$ARCH \
         -t format:$FORMAT \
         -t imagename:$OUTPUT \
@@ -338,7 +340,7 @@ elif [ "$ROOTFS" ]; then
 else
     echo "Building image from recipe $(b full.yaml) ..."
     OUTPUT=$OUTDIR/kali-linux-$VERSION-$VARIANT-$ARCH
-    debos $OPTS \
+    debos "$@" \
         -t arch:$ARCH \
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
