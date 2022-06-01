@@ -51,29 +51,50 @@ fail() { echo "$@" >&2; exit 1; }
 
 ask_confirmation() {
     local question=${1:-"Do you want to continue?"}
-    local answer=
-    local choices=
     local default=yes
-    local timeout=10
-    local ret=0
+    local default_verbing=
+    local choices=
+    local grand_timeout=60
+    local timeout=20
+    local time_left=
+    local answer=
+    local ret=
 
     # If stdin is closed, no need to ask, assume yes
     [ -t 0 ] || return 0
 
-    # Capitalize the default choice
-    [ $default = yes ] && choices="[Y/n]" || choices="[y/N]"
+    # Set variables that depend on default
+    if [ $default = yes ]; then
+        default_verbing=proceeding
+        choices="[Y/n]"
+    else
+        default_verbing=aborting
+        choices="[y/N]"
+    fi
 
     # Discard chars pending on stdin
-    while read -r -t 0; do read -n 256 -r -s; done
+    while read -r -t 0; do read -r; done
 
-    # Ask the question
-    read -r -t $timeout -p "$question $choices " answer || ret=$?
-    if [ $ret -gt 128 ]; then
-        echo "No answer, assuming $default."
-        answer=$default
+    # Ask the question, allow for X timeouts before proceeding anyway
+    grand_timeout=$((grand_timeout - timeout))
+    for time_left in $(seq $grand_timeout -$timeout 0); do
         ret=0
-    fi
-    [ $ret -eq 0 ] || exit $ret
+        read -r -t $timeout -p "$question $choices " answer || ret=$?
+        if [ $ret -gt 128 ]; then
+            if [ $time_left -gt 0 ]; then
+                echo "$time_left seconds left before $default_verbing"
+            else
+                echo "No answer, assuming $default, $default_verbing"
+            fi
+            continue
+        elif [ $ret -gt 0 ]; then
+            exit $ret
+        else
+            break
+        fi
+    done
+
+    # Process the answer
     [ "$answer" ] && answer=${answer,,} || answer=$default
     case "$answer" in
         (y|yes) return 0 ;;
