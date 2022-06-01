@@ -4,7 +4,7 @@ set -eu
 
 locale=$1
 
-# escape dots in order to use as a pattern to match
+# escape dots in order to use as a match pattern
 pattern=$(echo $locale | sed "s/\./\\./g")
 
 if ! grep -q "^# $pattern " /etc/locale.gen; then

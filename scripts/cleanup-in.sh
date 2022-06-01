@@ -1,25 +1,13 @@
-#!/bin/bash
-
-# XXX mostly taken from internal wiki
+#!/bin/sh
 
 set -eu
 
-for x in clean auto-remove autoclean; do
-  echo ${x};
-  apt -y -qq "${x}";
-  echo;
-done
+export DEBIAN_FRONTEND=noninteractive
 
-for x in autoremove; do
-  echo ${x};
-  apt -y -qq --purge "${x}";
-  echo;
-done
+apt-get autoremove --purge -y
+apt-get clean
 
-dpkg --list \
-  | grep "^rc" \
-  | cut -d " " -f 3 \
-  | while read x; do
-    echo ${x};
-    dpkg --purge ${x};
+rc_packages=$(dpkg --list | grep "^rc" | cut -d " " -f 3)
+for pkg in $rc_packages; do
+    dpkg --purge $pkg
 done
