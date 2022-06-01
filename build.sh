@@ -308,7 +308,7 @@ mkdir -p $OUTDIR
 
 if [ $VARIANT = rootfs ]; then
     echo "Building rootfs from recipe $(b rootfs.yaml) ..."
-    ROOTFS=$OUTDIR/rootfs-$VERSION-$ARCH.tar.gz
+    OUTPUT=$OUTDIR/rootfs-$VERSION-$ARCH.tar.gz
     debos $OPTS \
         -t arch:$ARCH \
         -t branch:$BRANCH \
@@ -317,22 +317,18 @@ if [ $VARIANT = rootfs ]; then
         -t mirror:$MIRROR \
         -t packages:"$PACKAGES" \
         -t password:"$PASSWORD" \
-        -t rootfs:$ROOTFS \
+        -t rootfs:$OUTPUT \
         -t timezone:$TIMEZONE \
         -t toolset:$TOOLSET \
         -t username:$USERNAME \
         rootfs.yaml
-    exit 0
-fi
-
-IMAGE=$OUTDIR/kali-linux-$VERSION-$VARIANT-$ARCH
-
-if [ "$ROOTFS" ]; then
+elif [ "$ROOTFS" ]; then
     echo "Building image from recipe $(b image.yaml) ..."
+    OUTPUT=$OUTDIR/kali-linux-$VERSION-$VARIANT-$ARCH
     debos $OPTS \
         -t arch:$ARCH \
         -t format:$FORMAT \
-        -t imagename:$IMAGE \
+        -t imagename:$OUTPUT \
         -t keep:$KEEP \
         -t rootfs:$ROOTFS \
         -t size:$SIZE \
@@ -341,12 +337,13 @@ if [ "$ROOTFS" ]; then
         image.yaml
 else
     echo "Building image from recipe $(b full.yaml) ..."
+    OUTPUT=$OUTDIR/kali-linux-$VERSION-$VARIANT-$ARCH
     debos $OPTS \
         -t arch:$ARCH \
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
         -t format:$FORMAT \
-        -t imagename:$IMAGE \
+        -t imagename:$OUTPUT \
         -t keep:$KEEP \
         -t locale:$LOCALE \
         -t mirror:$MIRROR \
@@ -360,3 +357,31 @@ else
         -t zip:$ZIP \
         full.yaml
 fi
+
+cat << EOF
+..............
+            ..,;:ccc,.
+          ......''';lxO.
+.....''''..........,:ld;
+           .';;;:::;,,.x,
+      ..'''.            0Xxoc:,.  ...
+  ....                ,ONkc;,;cokOdc',.
+ .                   OMo           ':$(b dd)o.
+                    dMc               :OO;
+                    0M.                 .:o.
+                    ;Wd
+                     ;XO,
+                       ,d0Odlc;,..
+                           ..',;:cdOOd::,.
+                                    .:d;.':;.
+                                       'd,  .'
+                                         ;l   ..
+                                          .o
+                                            c
+                                            .'
+                                             .
+
+Successful build! Find your Kali Linux image at
+$(b $OUTPUT).
+
+EOF
