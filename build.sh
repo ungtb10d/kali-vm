@@ -2,6 +2,8 @@
 
 set -eu
 
+OUTDIR=images
+
 WELL_KNOWN_CACHING_PROXIES="\
 3142 apt-cacher-ng
 8000 squid-deb-proxy
@@ -288,11 +290,11 @@ ask_confirmation || fail "Abort."
 # * everything toolset: 40G
 OPTS="-m 4G --scratchsize=45G"
 
-mkdir -p images
+mkdir -p $OUTDIR
 
 if [ $VARIANT = rootfs ]; then
     echo "Building rootfs from recipe $(b rootfs.yaml) ..."
-    ROOTFS=images/rootfs-$VERSION-$ARCH.tar.gz
+    ROOTFS=$OUTDIR/rootfs-$VERSION-$ARCH.tar.gz
     debos $OPTS \
         -t arch:$ARCH \
         -t branch:$BRANCH \
@@ -309,7 +311,7 @@ if [ $VARIANT = rootfs ]; then
     exit 0
 fi
 
-IMAGE=images/kali-linux-$VERSION-$VARIANT-$ARCH
+IMAGE=$OUTDIR/kali-linux-$VERSION-$VARIANT-$ARCH
 
 if [ "$ROOTFS" ]; then
     echo "Building image from recipe $(b image.yaml) ..."
