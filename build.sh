@@ -8,6 +8,7 @@ WELL_KNOWN_CACHING_PROXIES="\
 3142 apt-cacher-ng
 8000 squid-deb-proxy
 9999 approx"
+DETECTED_CACHING_PROXY=
 
 SUPPORTED_ARCHITECTURES="amd64 i386"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
@@ -50,6 +51,12 @@ default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
 b() { tput bold; echo -n "$@"; tput sgr0; }
 fail() { echo "$@" >&2; exit 1; }
+
+kali_message() {
+    echo "┏━━($(b $@))"
+    while read -r line; do echo "┃ $line"; done
+    echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+}
 
 ask_confirmation() {
     local question=${1:-"Do you want to continue?"}
@@ -243,30 +250,36 @@ PACKAGES=$(echo $PACKAGES | sed "s/[, ]\+/\n/g" | LC_ALL=C sort -u \
 
 # Attempt to detect well-known http caching proxies on localhost,
 # cf. bash(1) section "REDIRECTION". This is not bullet-proof.
-echo "# Proxy configuration:"
 if ! [ -v http_proxy ]; then
     while read port proxy; do
         (</dev/tcp/localhost/$port) 2>/dev/null || continue
-        echo "Detected caching proxy $(b $proxy) on port $(b $port)."
+        DETECTED_CACHING_PROXY="$port $proxy"
         export http_proxy="http://10.0.2.2:$port"
         break
     done <<< "$WELL_KNOWN_CACHING_PROXIES"
 fi
+
+# Print a summary
+{
+echo "# Proxy configuration:"
+if [ "$DETECTED_CACHING_PROXY" ]; then
+    read port proxy <<< $DETECTED_CACHING_PROXY
+    echo "Detected caching proxy $(b $proxy) on port $(b $port)."
+fi
 if [ "${http_proxy:-}" ]; then
-    echo "Using a proxy via env variable: $(b http_proxy=$http_proxy)."
+    echo "Using proxy via environment variable: $(b http_proxy=$http_proxy)."
 else
     echo "No http proxy configured, all packages will be downloaded from Internet."
 fi
 
-# Print a summary of the build options
 echo "# Build options:"
 if [ $VARIANT = rootfs ]; then
-    echo "Build a Kali $(b $VARIANT) for the $(b $ARCH) architecture."
+    echo "Build a Kali Linux $(b $VARIANT) for the $(b $ARCH) architecture."
 else
     if [ "$ROOTFS" ]; then
-        echo "Build a Kali $(b $VARIANT) image based on $(b $ROOTFS)."
+        echo "Build a Kali Linux $(b $VARIANT) image based on $(b $ROOTFS)."
     else
-        echo "Build a Kali $(b $VARIANT) image for the $(b $ARCH) architecture."
+        echo "Build a Kali Linux $(b $VARIANT) image for the $(b $ARCH) architecture."
     fi
     echo "Export the image to the $(b $FORMAT) format. Disk size: $(b $SIZE)."
 fi
@@ -278,6 +291,7 @@ fi
 [ "$LOCALE"   ] && echo "* locale: $(b $LOCALE)"
 [ "$TIMEZONE" ] && echo "* timezone: $(b $TIMEZONE)"
 [ "$USERNAME" ] && echo "* username: $(b $USERNAME)"
+} | kali_message "Kali Linux VM Build"
 
 # Ask for confirmation before starting the build
 ask_confirmation || fail "Abort."
