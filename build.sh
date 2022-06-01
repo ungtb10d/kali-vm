@@ -57,6 +57,9 @@ ask_confirmation() {
     local timeout=10
     local ret=0
 
+    # If stdin is closed, no need to ask, assume yes
+    [ -t 0 ] || return 0
+
     # Capitalize the default choice
     [ $default = yes ] && choices="[Y/n]" || choices="[y/N]"
 
