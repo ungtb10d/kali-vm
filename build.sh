@@ -293,9 +293,9 @@ fi
 [ "$DESKTOP"  ] && echo "* desktop environment: $(b $DESKTOP)"
 [ "$TOOLSET"  ] && echo "* tool selection: $(b $TOOLSET)"
 [ "$PACKAGES" ] && echo "* additional packages: $(b $PACKAGES)"
+[ "$USERNAME" ] && echo "* username & password: $(b $USERNAME $PASSWORD)"
 [ "$LOCALE"   ] && echo "* locale: $(b $LOCALE)"
 [ "$TIMEZONE" ] && echo "* timezone: $(b $TIMEZONE)"
-[ "$USERNAME" ] && echo "* username: $(b $USERNAME)"
 } | kali_message "Kali Linux VM Build"
 
 # Ask for confirmation before starting the build
