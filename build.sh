@@ -50,7 +50,7 @@ default_toolset() { [ ${DESKTOP:-$DEFAULT_DESKTOP} = headless ] && echo none || 
 default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
 b() { tput bold; echo -n "$@"; tput sgr0; }
-fail() { echo "$@" >&2; exit 1; }
+fail() { echo "ERROR:" "$@" >&2; exit 1; }
 
 kali_message() {
     local line=
@@ -161,7 +161,7 @@ while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:v:z" opt; do
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
         (D) DESKTOP=$OPTARG ;;
-        (h) echo "$USAGE" && exit 0 ;;
+        (h) echo "$USAGE"; exit 0 ;;
         (k) KEEP=true ;;
         (L) LOCALE=$OPTARG ;;
         (m) MIRROR=$OPTARG ;;
@@ -174,7 +174,7 @@ while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:v:z" opt; do
         (U) USERPASS=$OPTARG ;;
         (v) VERSION=$OPTARG ;;
         (z) ZIP=true ;;
-        (*) fail "$USAGE" ;;
+        (*) echo "$USAGE" >&2; exit 1 ;;
     esac
 done
 shift $((OPTIND - 1))
@@ -295,7 +295,7 @@ fi
 } | kali_message "Kali Linux VM Build"
 
 # Ask for confirmation before starting the build
-ask_confirmation || fail "Abort."
+ask_confirmation || { echo "Abort."; exit 1; }
 
 # Notes regarding the scratch size needed to build a Kali image from scratch
 # (ie. in one step, no intermediary rootfs), using the kali-rolling branch and
