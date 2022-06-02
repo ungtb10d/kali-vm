@@ -53,8 +53,9 @@ b() { tput bold; echo -n "$@"; tput sgr0; }
 fail() { echo "$@" >&2; exit 1; }
 
 kali_message() {
+    local line=
     echo "┏━━($(b $@))"
-    while read -r line; do echo "┃ $line"; done
+    while IFS= read -r line; do echo "┃ $line"; done
     echo "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 }
 
