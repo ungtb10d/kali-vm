@@ -50,6 +50,7 @@ default_toolset() { [ ${DESKTOP:-$DEFAULT_DESKTOP} = headless ] && echo none || 
 default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
 b() { tput bold; echo -n "$@"; tput sgr0; }
+warn() { echo "WARNING:" "$@" >&2; }
 fail() { echo "ERROR:" "$@" >&2; exit 1; }
 
 kali_message() {
@@ -112,7 +113,10 @@ ask_confirmation() {
     esac
 }
 
-[ $(id -u) -eq 0 ] && fail "No need to be root. Please run as normal user."
+if [ $(id -u) -eq 0 ]; then
+    warn "This script does not require root privileges."
+    warn "Please consider running it as a non-root user."
+fi
 
 USAGE="Usage: $(basename $0) [<option>...]
 
