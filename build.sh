@@ -15,9 +15,8 @@ SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
 SUPPORTED_DESKTOPS="e17 gnome headless i3 kde lxde mate xfce"
 SUPPORTED_TOOLSETS="default everything large none"
 
-SUPPORTED_FORMATS="ova ovf raw qemu rootfs virtualbox vmware"
+SUPPORTED_FORMATS="ova ovf raw qemu virtualbox vmware"
 SUPPORTED_VARIANTS="generic qemu rootfs virtualbox vmware"
-SUGGESTED_TYPES="generic-ova generic-ovf generic-raw qemu rootfs virtualbox vmware"
 
 DEFAULT_ARCH=amd64
 DEFAULT_BRANCH=kali-rolling
@@ -31,6 +30,7 @@ DEFAULT_USERPASS=kali:kali
 ARCH=
 BRANCH=
 DESKTOP=
+FORMAT=
 KEEP=false
 LOCALE=
 MIRROR=
@@ -40,9 +40,9 @@ ROOTFS=
 SIZE=80
 TIMEZONE=
 TOOLSET=
-TYPE=generic-raw
 USERNAME=
 USERPASS=
+VARIANT=generic
 VERSION=
 ZIP=false
 
@@ -127,12 +127,14 @@ Build options:
               Supported values: $SUPPORTED_ARCHITECTURES
   -b BRANCH   Kali branch used to build the image, default: $(b $DEFAULT_BRANCH)
               Supported values: $SUPPORTED_BRANCHES
+  -f FORMAT   Format to export the image to, default depends on the VARIANT
+              Supported values: $SUPPORTED_FORMATS
   -k          Keep raw disk image and other intermediary build artifacts
   -m MIRROR   Mirror used to build the image, default: $(b $DEFAULT_MIRROR)
   -r ROOTFS   Rootfs to use to build the image, default: $(b none)
   -s SIZE     Size of the disk image in GB, default: $(b $SIZE)
-  -t TYPE     Type of image to build (see below for details), default: $(b $TYPE)
-              Supported values: $SUGGESTED_TYPES
+  -v VARIANT  Variant of image to build (see below for details), default: $(b VARIANT)
+              Supported values: $SUPPORTED_VARIANTS
   -z          Zip images and metadata files after the build
 
 Customization options:
@@ -145,14 +147,20 @@ Customization options:
   -T TIMEZONE Set timezone, default: $(b $DEFAULT_TIMEZONE)
   -U USERPASS Username and password, separated by a colon, default: $(b $DEFAULT_USERPASS)
 
-The different types of images that can be built:
-  generic-ova streamOptimized VMDK disk image, OVF metadata file, packed in a OVA archive
-  generic-ovf monolithicSparse VMDK disk image, OVF metadata file
-  generic-raw sparse raw disk image
-  qemu        QCOW2 disk image
+The different variants of images are:
+  generic     Image with all virtualization support pre-installed, default format: raw
+  qemu        Image with QEMU and SPICE guest agents pre-installed, default format: qemu
+  rootfs      Not an image, a root filesystem (no bootloader/kernel), packed in a .tar.gz
+  virtualbox  Image with VirtualBox guest utilities pre-installed, default format: virtualbox
+  vmware      Image with Open VM Tools pre-installed, default format: vmware
+
+The different formats are:
+  ova         streamOptimized VMDK disk image, OVF metadata file, packed in a OVA archive
+  ovf         monolithicSparse VMDK disk image, OVF metadata file
+  raw         sparse disk image, no metadata
+  qemu        QCOW2 disk image, no metadata
   virtualbox  VDI disk image, .vbox metadata file
   vmware      2GbMaxExtentSparse VMDK disk image, VMX metadata file
-  rootfs      A root filesystem (no bootloader/kernel), packed in a .tar.gz archive
 
 Supported environment variables:
   http_proxy  HTTP proxy URL, refer to the README for more details.
@@ -160,11 +168,12 @@ Supported environment variables:
 Refer to the README for examples.
 "
 
-while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:x:z" opt; do
+while getopts ":a:b:D:f:hkL:m:P:r:s:S:T:U:v:x:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
         (D) DESKTOP=$OPTARG ;;
+        (f) FORMAT=$OPTARG ;;
         (h) echo "$USAGE"; exit 0 ;;
         (k) KEEP=true ;;
         (L) LOCALE=$OPTARG ;;
@@ -173,9 +182,9 @@ while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:x:z" opt; do
         (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
         (S) TOOLSET=$OPTARG ;;
-        (t) TYPE=$OPTARG ;;
         (T) TIMEZONE=$OPTARG ;;
         (U) USERPASS=$OPTARG ;;
+        (v) VARIANT=$OPTARG ;;
         (x) VERSION=$OPTARG ;;
         (z) ZIP=true ;;
         (*) echo "$USAGE" >&2; exit 1 ;;
@@ -183,22 +192,27 @@ while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:x:z" opt; do
 done
 shift $((OPTIND - 1))
 
-# The image TYPE bundles two settings: the VARIANT (eg. extra packages to
-# install, additional configuration, and so on) and the FORMAT. In its long
-# form, the TYPE is just VARIANT-FORMAT. More often than not though, variant
-# and format are the same, so for convenience a short form is allowed.
-if echo $TYPE | grep -q "-"; then
-    VARIANT=$(echo $TYPE | cut -d- -f1)
-    FORMAT=$(echo $TYPE | cut -d- -f2)
-else
-    VARIANT=$TYPE
-    FORMAT=$TYPE
-fi
+# The first step is to validate the variant.
 echo $SUPPORTED_VARIANTS | grep -qw $VARIANT \
-    || fail "Unsupported type '$TYPE'"
-echo $SUPPORTED_FORMATS | grep -qw $FORMAT \
-    || fail "Unsupported type '$TYPE'"
-unset TYPE
+    || fail "Unsupported variant '$VARIANT'"
+
+# If format was not set, choose a sensible default according to the variant.
+# Moreover, there should be no format when building a rootfs.
+if [ $VARIANT != rootfs ]; then
+    if [ -z "$FORMAT" ]; then
+        case $VARIANT in
+            (generic)    FORMAT=raw ;;
+            (qemu)       FORMAT=qemu ;;
+            (virtualbox) FORMAT=virtualbox ;;
+            (vmware)     FORMAT=vmware ;;
+            (*) fail "Unsupported variant '$VARIANT'" ;;
+        esac
+    fi
+    echo $SUPPORTED_FORMATS | grep -qw $FORMAT \
+        || fail "Unsupported format '$FORMAT'"
+else
+    [ -z "$FORMAT" ] || fail "Option -f can't be used to build a rootfs"
+fi
 
 # When building an image from an existing rootfs, ARCH and VERSION are picked
 # from the rootfs name. Moreover, many options don't apply, as they've been

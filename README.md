@@ -85,72 +85,84 @@ The best starting point, as always, is the usage message:
 ./build.sh -h
 ```
 
-Building a Kali rolling image, default desktop, default toolset. Don't export
-it to any format, just build a raw disk image, ie. a plain binary image of the
-disk. This image can be started with QEMU.
+Building a Kali rolling image, default desktop, default toolset. This is a raw
+disk image, ie. a plain binary image of the disk. This image can be started
+with QEMU, for example.
 
 ```
 ./build.sh
 ```
 
-Build the last stable release of Kali, and export it for VMware. Install the
-GNOME desktop environment, rather than the default XFCE.
+Build a Kali Linux image tailored for VMware. It means that it comes with the
+Open VM Tools pre-installed, and the image produced is ready to be imported "as
+is" in VMware. Also, we're going to build it from the last stable release of
+Kali, and we'll install the GNOME desktop environment, rather than the usual
+default XFCE.
 
 ```
-./build.sh -t vmware -b kali-last-snapshot -D gnome
+./build.sh -v vmware -b kali-last-snapshot -D gnome
 ```
 
-Build the Kali Linux everything image, and give it a 150 GB disk. Export it for
-VirtualBox.
+Build a Kali Linux image tailored for VirtualBox: it comes with the VirtualBox
+guest utilities pre-installed, and the image can be imported "as is" in
+VirtualBox. Moreover, we want a 150 GB virtual disk, and we'll install the
+"everything" tool selection (that is, pretty much every tool in Kali).
 
 ```
-./build.sh -t virtualbox -S everything -s 150
+./build.sh -v virtualbox -s 150 -S everything
 ```
 
-Build a light Kali image: no desktop environment and no default toolset. Export
-it to the OVA format, suitable for both VMware and VirtualBox.  Also install
-the package `metasploit-framework`.
+Build a lightweight Kali image: no desktop environment and no default toolset.
+This is a generic image, it comes with support for most VM engines out there.
+We'll export it to the OVA format, suitable for both VMware and VirtualBox.
+Let's also install the package `metasploit-framework`.
 
 ```
-./build.sh -t generic-ova -D headless -P metasploit-framework
+./build.sh -v generic -f ova -D headless -P metasploit-framework
 ```
 
-Build a Kali rolling image, and configure it to mimic the host system: same
+Build a Kali image, and configure it to mimic the host system: same
 username, same locale and same timezone.
 
 ```
 ./build.sh -L $LANG -T $(cat /etc/timezone) -U $USER:'s3cr3t!p4ssw0rd'
 ```
 
-### Types of build
+### Variants and formats
 
-Different types of images can be built using the option `-t`. The image type
-decides what virtualization support is installed in the image, and in what
-format the image will be exported to.
+Different variants of image can be built, depending on what VM engine you want
+to run the Kali image in. The VARIANT mostly defines what extra package gets
+installed into the image, to add support for a particular VM engine. Then the
+FORMAT defines what format for the virtual disk, and what additional metadata
+files to produce.
 
-| image type  | disk format             | metadata | container |
-| ----------- | ----------------------- | -------- | --------- |
-| generic-ova |    streamOptimized VMDK |      OVF |       OVA |
-| generic-ovf |   monolithicSparse VMDK |      OVF |           |
-| generic-raw |       raw (sparse file) |     none |           |
-| qemu        |                   QCOW2 |     none |           |
-| virtualbox  |                     VDI |     VBOX |           |
-| vmware      | 2GbMaxExtentSparse VMDK |      VMX |           |
+If unset, the format (option `-f`) is automatically set according to the
+variant (option `-v`). Not every combination of variant and format make sense,
+so the table below tries to summarize the most common combinations.
 
-The `generic-*` images come with virtualization support packages pre-installed
+| variant    | format     | disk format             | metadata | pack |
+| ---------- | ---------- | ----------------------- | -------- | ---- |
+| generic    | raw        |       raw (sparse file) |     none |      |
+| generic    | ova        |    streamOptimized VMDK |      OVF |  OVA |
+| generic    | ovf        |   monolithicSparse VMDK |      OVF |      |
+| qemu       | qemu       |                   QCOW2 |     none |      |
+| virtualbox | virtualbox |                     VDI |     VBOX |      |
+| vmware     | vmware     | 2GbMaxExtentSparse VMDK |      VMX |      |
+
+The `generic` images come with virtualization support packages pre-installed
 for QEMU, VirtualBox and VMware, hence the name "generic". While other images,
 that target a specific VM engine, only come with support for this particular
 virtualization engine.
 
-Only the image `generic-ova` defines a container: the result of the build is a
-`.ova` file, which is simply a tar archive. For other image types, the build
-produce separate files. They can be bundled together in a 7z archive with the
-option `-z`.
+Only the format `ova` defines a container: the result of the build is a `.ova`
+file, which is simply a tar archive. For other formats, the build produce
+separate files. They can be bundled together in a 7z archive with the option
+`-z`.
 
 There is also a `rootfs` type: this is not an image. It's simply a Kali Linux
 root filesystem tree, without the kernel and the bootloader, and packed in a
 `.tar.gz` archive. The main use-case is to reuse it as input to build an OS
-image.
+image, and it's not meant to be used outside of the build system.
 
 ### Additional configuration
 
@@ -201,7 +213,7 @@ more details.
 ### Building and reusing a rootfs
 
 It's possible to break the build in two steps. You can first build a rootfs
-with `./build.sh -t rootfs`, and then build an image based on this rootfs with
+with `./build.sh -v rootfs`, and then build an image based on this rootfs with
 `./build.sh -r ROOTFS_NAME.tar.gz`. It makes sense if you plan to build several
 image types, for example.
 
