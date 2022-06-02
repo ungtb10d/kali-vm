@@ -11,8 +11,13 @@ elif [ -x /usr/bin/docker ]; then
     PODMAN=docker
     RUN_OPTS=
 else
-    echo "No container engine detected, aborting." >&2
+    echo "ERROR: No container engine detected, aborting." >&2
     exit 1
+fi
+
+if [ $PODMAN = podman ] && [ $(id -u) -ne 0 ]; then
+    echo "WARNING: Rootless podman container is not recommended to build Kali VM." >&2
+    echo "WARNING: Please consider running as the root user for best performance." >&2
 fi
 
 if ! $PODMAN inspect --type image $IMAGE >/dev/null 2>&1; then
