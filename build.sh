@@ -311,7 +311,7 @@ mkdir -p $OUTDIR
 
 if [ $VARIANT = rootfs ]; then
     echo "Building rootfs from recipe $(b rootfs.yaml) ..."
-    OUTPUT=$OUTDIR/rootfs-$VERSION-$ARCH.tar.gz
+    OUTPUT=$OUTDIR/rootfs-$VERSION-$ARCH
     debos "$@" \
         -t arch:$ARCH \
         -t branch:$BRANCH \

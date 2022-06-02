@@ -105,4 +105,4 @@ actions:
 
   - description: "Pack {{ $rootfs }}"
     action: pack
-    file: {{ $rootfs }}
+    file: {{ $rootfs }}.tar.gz
