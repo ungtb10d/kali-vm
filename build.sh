@@ -160,7 +160,7 @@ Supported environment variables:
 Refer to the README for examples.
 "
 
-while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:v:z" opt; do
+while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:x:z" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
@@ -176,7 +176,7 @@ while getopts ":a:b:D:hkL:m:P:r:s:S:t:T:U:v:z" opt; do
         (t) TYPE=$OPTARG ;;
         (T) TIMEZONE=$OPTARG ;;
         (U) USERPASS=$OPTARG ;;
-        (v) VERSION=$OPTARG ;;
+        (x) VERSION=$OPTARG ;;
         (z) ZIP=true ;;
         (*) echo "$USAGE" >&2; exit 1 ;;
     esac
@@ -213,7 +213,7 @@ if [ "$ROOTFS" ]; then
     [ -z "$TIMEZONE" ] || fail "Option -T can't be used together with option -r"
     [ -z "$TOOLSET"  ] || fail "Option -S can't be used together with option -r"
     [ -z "$USERPASS" ] || fail "Option -U can't be used together with option -r"
-    [ -z "$VERSION" ] || fail "Option -v can't be used together with option -r"
+    [ -z "$VERSION" ] || fail "Option -x can't be used together with option -r"
     ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
     VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
 else
