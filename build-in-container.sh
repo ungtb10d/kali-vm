@@ -3,32 +3,32 @@
 set -eu
 
 IMAGE=kali-rolling/vm-builder
+OPTS=(
+    --rm --interactive --tty --net host
+    --device /dev/kvm --group-add $(stat -c "%g" /dev/kvm)
+    --volume $(pwd):/recipes --workdir /recipes
+)
 
 if [ -x /usr/bin/podman ]; then
     PODMAN=podman
-    RUN_OPTS="--log-driver none"
+    if [ $(id -u) -eq 0 ]; then
+        OPTS+=(--user $(stat -c "%u:%g" .))
+    fi
+    OPTS+=(--log-driver none)    # we don't want stdout in the journal
 elif [ -x /usr/bin/docker ]; then
     PODMAN=docker
-    RUN_OPTS=
+    OPTS+=(--user $(stat -c "%u:%g" .))
 else
     echo "ERROR: No container engine detected, aborting." >&2
     exit 1
 fi
 
-if [ $PODMAN = podman ] && [ $(id -u) -ne 0 ]; then
-    echo "WARNING: Rootless podman container is not recommended to build Kali VM." >&2
-    echo "WARNING: Please consider running as the root user for best performance." >&2
-fi
+bold() { tput bold; echo "$@"; tput sgr0; }
+vrun() { echo; bold "$" "$@"; "$@"; }
+vexec() { echo; bold "$" "$@"; exec "$@"; }
 
 if ! $PODMAN inspect --type image $IMAGE >/dev/null 2>&1; then
-    $PODMAN build -t $IMAGE .
+    vrun $PODMAN build -t $IMAGE .
 fi
 
-$PODMAN run --interactive --rm --tty \
-    --device /dev/kvm \
-    --group-add $(stat -c "%g" /dev/kvm) \
-    --net host \
-    --user $(stat -c "%u:%g" .) \
-    --volume $(pwd):/recipes \
-    --workdir /recipes \
-    $RUN_OPTS $IMAGE ./build.sh "$@"
+vexec $PODMAN run "${OPTS[@]}" $IMAGE ./build.sh "$@"

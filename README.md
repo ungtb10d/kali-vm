@@ -48,29 +48,20 @@ Then use the script `build.sh` to build an image.
 
 ### Build from within a container
 
-If you prefer to build from within a container, you'll need either `podman` or
-`docker` to be installed on your machine.
+If you prefer to build from within a container, you'll need to install either
+`podman` or `docker` on your machine.
 
 Then use the script `build-in-container.sh` to build an image.
 
 This script is simply a wrapper on top of `build.sh`, it takes care of creating
 the container image if missing, and then it starts a container and performs the
-build from within. Both `podman` and `docker` are supported.
+build from within. Both `podman` and `docker` are supported, the script picks
+one depending on what's installed on your system.
 
-If you go with `podman`, you must run the script as root. If you go with
-`docker`, run as root if your user is not part of the `docker` group, run
-normally otherwise.
+`podman` has been tested, both as root (eg. `$ sudo ./build-in-container.sh`)
+and rootless (eg. `$ ./build-in-container.sh`), it works fine in both cases.
 
-Saying it again, with code:
-
-```
-# if podman
-$ sudo ./build-in-container.sh
-# if docker, user not in docker group
-$ sudo ./build-in-container.sh
-# if docker, user in docker group
-$ ./build-in-container.sh
-```
+`docker` has not been tested in a while, but it's expected to work.
 
 ## Building an image
 
