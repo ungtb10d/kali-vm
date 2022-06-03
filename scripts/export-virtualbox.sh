@@ -30,5 +30,5 @@ if [ $zip -eq 1 ]; then
     echo "INFO: Compress to $image.7z"
     mkdir $image
     mv $image.vdi $image.vbox $image
-    7z a -sdel -mx=9 $image.7z $image
+    7zr a -sdel -mx=9 $image.7z $image
 fi

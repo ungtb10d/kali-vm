@@ -31,5 +31,5 @@ image=$(basename $image)
 
 if [ $zip -eq 1 ]; then
     echo "INFO: Compress to $image.7z"
-    7z a -sdel -mx=9 $image.7z $image.ovf $image.vmdk $image.mf
+    7zr a -sdel -mx=9 $image.7z $image.ovf $image.vmdk $image.mf
 fi
