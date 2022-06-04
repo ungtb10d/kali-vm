@@ -18,7 +18,3 @@ rm -fr $ROOTDIR/var/tmp/*
 #rm -rf $ROOTDIR/var/lib/apt/lists/*
 #mkdir  $ROOTDIR/var/lib/apt/lists/partial
 #find   $ROOTDIR/var/log -depth -type f -print0 | xargs -0 truncate -s 0
-
-if [ -d $ROOTDIR/script ]; then
-    rmdir $ROOTDIR/script
-fi

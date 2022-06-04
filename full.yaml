@@ -113,10 +113,6 @@ actions:
         partition: root
         options: [ errors=remount-ro ]
 
-  - action: run
-    chroot: true
-    command: partprobe
-
   - action: filesystem-deploy
     setup-kernel-cmdline: false
 
