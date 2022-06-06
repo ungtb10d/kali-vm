@@ -49,7 +49,12 @@ ZIP=false
 default_toolset() { [ ${DESKTOP:-$DEFAULT_DESKTOP} = headless ] && echo none || echo default; }
 default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
-b() { tput bold; echo -n "$@"; tput sgr0; }
+# Output bold only if both stdout/stderr are opened on a terminal
+if [ -t 1 -a -t 2 ]; then
+    b() { tput bold; echo -n "$@"; tput sgr0; }
+else
+    b() { echo -n "$@"; }
+fi
 warn() { echo "WARNING:" "$@" >&2; }
 fail() { echo "ERROR:" "$@" >&2; exit 1; }
 
