@@ -123,7 +123,7 @@ if [ $(id -u) -eq 0 ]; then
     warn "Please consider running it as a non-root user."
 fi
 
-USAGE="Usage: $(basename $0) [<option>...]
+USAGE="Usage: $(basename $0) [<option>...] [-- <debos option>...]
 
 Build a Kali Linux OS image.
 
