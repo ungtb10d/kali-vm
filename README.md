@@ -73,7 +73,57 @@ this point we'll use `build.sh` for brevity.
 The best starting point, as always, is the usage message:
 
 ```
-./build.sh -h
+$ ./build.sh -h
+Usage: build.sh [<option>...] [-- <debos option>...]
+
+Build a Kali Linux OS image.
+
+Build options:
+  -a ARCH     Build an image for this architecture, default: amd64
+              Supported values: amd64 i386
+  -b BRANCH   Kali branch used to build the image, default: kali-rolling
+              Supported values: kali-dev kali-last-snapshot kali-rolling
+  -f FORMAT   Format to export the image to, default depends on the VARIANT
+              Supported values: ova ovf raw qemu virtualbox vmware
+  -k          Keep raw disk image and other intermediary build artifacts
+  -m MIRROR   Mirror used to build the image, default: http://http.kali.org/kali
+  -r ROOTFS   Rootfs to use to build the image, default: none
+  -s SIZE     Size of the disk image in GB, default: 80
+  -v VARIANT  Variant of image to build (see below for details), default: VARIANT
+              Supported values: generic qemu rootfs virtualbox vmware
+  -z          Zip images and metadata files after the build
+
+Customization options:
+  -D DESKTOP  Desktop environment installed in the image, default: xfce
+              Supported values: e17 gnome headless i3 kde lxde mate xfce
+  -L LOCALE   Set locale, default: en_US.UTF-8
+  -P PACKAGES Install extra packages (comma/space separated list)
+  -S TOOLSET  The selection of tools to include in the image, default: default
+              Supported values: default everything large none
+  -T TIMEZONE Set timezone, default: US/Eastern
+  -U USERPASS Username and password, separated by a colon, default: kali:kali
+
+The different variants of images are:
+  generic     Image with all virtualization support pre-installed, default format: raw
+  qemu        Image with QEMU and SPICE guest agents pre-installed, default format: qemu
+  rootfs      Not an image, a root filesystem (no bootloader/kernel), packed in a .tar.gz
+  virtualbox  Image with VirtualBox guest utilities pre-installed, default format: virtualbox
+  vmware      Image with Open VM Tools pre-installed, default format: vmware
+
+The different formats are:
+  ova         streamOptimized VMDK disk image, OVF metadata file, packed in a OVA archive
+  ovf         monolithicSparse VMDK disk image, OVF metadata file
+  raw         sparse disk image, no metadata
+  qemu        QCOW2 disk image, no metadata
+  virtualbox  VDI disk image, .vbox metadata file
+  vmware      2GbMaxExtentSparse VMDK disk image, VMX metadata file
+
+Supported environment variables:
+  http_proxy  HTTP proxy URL, refer to the README for more details.
+
+Refer to the README for examples.
+
+$
 ```
 
 Building a Kali rolling image, default desktop, default toolset. This is a raw
