@@ -24,11 +24,12 @@ else
 fi
 
 bold() { tput bold; echo "$@"; tput sgr0; }
-vrun() { echo; bold "$" "$@"; "$@"; }
-vexec() { echo; bold "$" "$@"; exec "$@"; }
+vrun() { bold "$" "$@"; "$@"; }
+vexec() { bold "$" "$@"; exec "$@"; }
 
 if ! $PODMAN inspect --type image $IMAGE >/dev/null 2>&1; then
     vrun $PODMAN build -t $IMAGE .
+    echo
 fi
 
 vexec $PODMAN run "${OPTS[@]}" $IMAGE ./build.sh "$@"
