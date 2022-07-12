@@ -18,23 +18,6 @@ within a virtual machine that is created on-the-fly by the build tool
 [debos][]. It uses [fakemachine][] under the hood, which in turn relies on
 QEMU/KVM.
 
-### User setup
-
-You must be part of the group `kvm`. You can check that with:
-
-```
-grep kvm /etc/group
-```
-
-If your username doesn't appear in the line returned,it means that you're not
-in the group, and you must add yourself to the `kvm` group:
-
-```
-sudo adduser $USER kvm
-```
-
-Then **log out and log back in** for the change to take effect.
-
 ### Build from the host
 
 If building straight from your machine, you'll need to install `debos` and a
