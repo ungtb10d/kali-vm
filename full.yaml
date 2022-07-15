@@ -129,7 +129,7 @@ actions:
   - description: "Setup GRUB"
     action: run
     chroot: true
-    command: update-grub && grub-install "$IMAGE"
+    command: grub-install "$IMAGE" && update-grub
 
   - description: "Install virtualization support for {{ $variant }}"
     action: run
