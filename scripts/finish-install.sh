@@ -95,9 +95,19 @@ configure_etc_hosts() {
     sed -Ei "/^127\.0\.0\.1\s+localhost/a 127.0.1.1\t$hostname" /etc/hosts
 }
 
+save_debconf() {
+    # save values for keyboard-configuration, otherwise debconf will
+    # ask to configure the keyboard when the package is upgraded.
+    if dpkg -s keyboard-configuration 2>/dev/null | grep -q "ok installed"; then
+        DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
+            dpkg-reconfigure keyboard-configuration
+    fi
+}
+
 while [ $# -ge 1 ]; do
     case $1 in
         apt-sources) configure_apt_sources_list ;;
+        debconf)     save_debconf ;;
         etc-hosts)   configure_etc_hosts ;;
         usergroups)  configure_usergroups ;;
         zsh)         configure_zsh ;;

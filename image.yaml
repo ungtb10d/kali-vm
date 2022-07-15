@@ -64,7 +64,7 @@ actions:
   - description: "Configure apt sources.list"
     action: run
     chroot: true
-    script: scripts/finish-install.sh apt-sources usergroups
+    script: scripts/finish-install.sh apt-sources debconf usergroups
 
   - description: "Final cleanup (from within)"
     action: run
