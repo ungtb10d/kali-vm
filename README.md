@@ -109,48 +109,44 @@ Refer to the README for examples.
 $
 ```
 
-Building a Kali rolling image, default desktop, default toolset. This is a raw
-disk image, ie. a plain binary image of the disk. This image can be started
-with QEMU, for example.
+Now let's go through some examples:
 
-```
-./build.sh
-```
+* `./build.sh`
 
-Build a Kali Linux image tailored for VMware. It means that it comes with the
-Open VM Tools pre-installed, and the image produced is ready to be imported "as
-is" in VMware. Also, we're going to build it from the last stable release of
-Kali, and we'll install the GNOME desktop environment, rather than the usual
-default XFCE.
+The command above builds a Kali rolling image, default desktop, default
+toolset. This will give you only a raw disk image (ie. a plain binary image of
+the disk) and nothing else. It's already a great starting point though: you can
+start this disk with QEMU, or you can convert it to another virtual disk format
+with `qemu-img convert`.
 
-```
-./build.sh -v vmware -b kali-last-snapshot -D gnome
-```
+* `./build.sh -v vmware -b kali-last-snapshot -D gnome`
 
-Build a Kali Linux image tailored for VirtualBox: it comes with the VirtualBox
-guest utilities pre-installed, and the image can be imported "as is" in
-VirtualBox. Moreover, we want a 150 GB virtual disk, and we'll install the
-"everything" tool selection (that is, pretty much every tool in Kali).
+With the command above, we build a Kali Linux image tailored for VMware. It's
+not just a virtual disk, the command also produces various metadata files, so
+that the VM can be imported "as is" in VMware. It also comes with the Open VM
+Tools pre-installed. Also, with this command we decide to build the image
+from the last stable release of Kali, and we install the GNOME desktop
+environment, rather than the usual default XFCE.
 
-```
-./build.sh -v virtualbox -s 150 -S everything
-```
+* `./build.sh -v virtualbox -s 150 -S everything`
 
-Build a lightweight Kali image: no desktop environment and no default toolset.
-This is a generic image, it comes with support for most VM engines out there.
-We'll export it to the OVA format, suitable for both VMware and VirtualBox.
-Let's also install the package `metasploit-framework`.
+With the command above, we build a Kali Linux image tailored for VirtualBox. It
+produces the virtual disk and the metadata files so that the VM can be imported
+"as is" in VirtualBox, and it comes with the VirtualBox guest utilities
+pre-installed. Moreover, we want a 150 GB disk, and we install the "everything"
+tool selection (that is, pretty much every tool in Kali).
 
-```
-./build.sh -v generic -f ova -D headless -P metasploit-framework
-```
+* `./build.sh -v generic -f ova -D headless -P metasploit-framework`
 
-Build a Kali image, and configure it to mimic the host system: same
-username, same locale and same timezone.
+Above, we build a lightweight Kali image: no desktop environment and no default
+toolset.  This is a generic image, it comes with support for most VM engines
+out there.  We'll export it to the OVA format, suitable for both VMware and
+VirtualBox.  Let's also install the package `metasploit-framework`.
 
-```
-./build.sh -L $LANG -T $(cat /etc/timezone) -U $USER:'s3cr3t!p4ssw0rd'
-```
+* `./build.sh -L $LANG -T $(cat /etc/timezone) -U $USER:'s3cr3t!p4ssw0rd'`
+
+Above, we build a Kali rolling image, and configure it to mimic the host
+system: same locale, same timezone and same username.
 
 ### Variants and formats
 
@@ -186,7 +182,7 @@ separate files. They can be bundled together in a 7z archive with the option
 There is also a `rootfs` type: this is not an image. It's simply a Kali Linux
 root filesystem tree, without the kernel and the bootloader, and packed in a
 `.tar.gz` archive. The main use-case is to reuse it as input to build an OS
-image, and it's not meant to be used outside of the build system.
+image, and it's not meant to be used outside of this build system.
 
 ### Additional configuration
 
