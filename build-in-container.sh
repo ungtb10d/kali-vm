@@ -6,12 +6,9 @@ IMAGE=kali-rolling/vm-builder
 OPTS=(
     --rm --interactive --tty --net host
     --device /dev/kvm --group-add $(stat -c "%g" /dev/kvm)
+    --security-opt label=disable
     --volume $(pwd):/recipes --workdir /recipes
 )
-
-if selinuxenabled 2> /dev/null; then
-    OPTS+=(--security-opt label=disable)
-fi
 
 if [ -x /usr/bin/podman ]; then
     PODMAN=podman
