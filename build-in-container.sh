@@ -9,6 +9,10 @@ OPTS=(
     --volume $(pwd):/recipes --workdir /recipes
 )
 
+if selinuxenabled 2> /dev/null; then
+    OPTS+=(--security-opt label=disable)
+fi
+
 if [ -x /usr/bin/podman ]; then
     PODMAN=podman
     if [ $(id -u) -eq 0 ]; then
