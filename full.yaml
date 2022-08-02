@@ -131,6 +131,9 @@ actions:
     chroot: true
     command: grub-install "$IMAGE" && update-grub
 
+  - action: overlay
+    source: overlays/grub-install-devices
+
   - description: "Install virtualization support for {{ $variant }}"
     action: run
     chroot: true
