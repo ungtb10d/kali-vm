@@ -233,8 +233,8 @@ if [ "$ROOTFS" ]; then
     [ -z "$TOOLSET"  ] || fail "Option -S can't be used together with option -r"
     [ -z "$USERPASS" ] || fail "Option -U can't be used together with option -r"
     [ -z "$VERSION" ] || fail "Option -x can't be used together with option -r"
-    ARCH=$(basename $ROOTFS | cut -d. -f1 | rev | cut -d- -f1 | rev)
-    VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\..*/\1/")
+    ARCH=$(basename $ROOTFS | sed "s/\.tar\.gz$//" | rev | cut -d- -f1 | rev)
+    VERSION=$(basename $ROOTFS | sed -E "s/^rootfs-(.*)-$ARCH\.tar\.gz$/\1/")
 else
     [ "$ARCH"    ] || ARCH=$DEFAULT_ARCH
     [ "$BRANCH"  ] || BRANCH=$DEFAULT_BRANCH
