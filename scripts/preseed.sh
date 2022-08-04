@@ -9,6 +9,10 @@ debconf-set-selections -v << EOF
 # Disable popularity-contest
 popularity-contest popularity-contest/participate boolean false
 
+# Disable the encfs error message
+encfs encfs/security-information boolean true
+encfs encfs/security-information seen true
+
 # Random other questions
 console-setup console-setup/charmap47 select UTF-8
 samba-common samba-common/dhcp boolean false
