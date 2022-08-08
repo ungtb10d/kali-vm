@@ -84,11 +84,6 @@ actions:
     chroot: true
     script: scripts/create-user.sh {{ $username }} "{{ $password }}"
 
-  - description: "Disable tmpfiles.d/systemd-resolve.conf, cf. #1007018"
-    action: run
-    chroot: false
-    command: ln -s /dev/null $ROOTDIR/etc/tmpfiles.d/systemd-resolve.conf
-
   - description: "Finish installation"
     action: run
     chroot: true
