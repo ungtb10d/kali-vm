@@ -138,7 +138,7 @@ Build options:
   -m MIRROR   Mirror used to build the image, default: $(b $DEFAULT_MIRROR)
   -r ROOTFS   Rootfs to use to build the image, default: $(b none)
   -s SIZE     Size of the disk image in GB, default: $(b $SIZE)
-  -v VARIANT  Variant of image to build (see below for details), default: $(b VARIANT)
+  -v VARIANT  Variant of image to build (see below for details), default: $(b $VARIANT)
               Supported values: $SUPPORTED_VARIANTS
   -z          Zip images and metadata files after the build
 
