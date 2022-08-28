@@ -52,14 +52,17 @@ actions:
     chroot: false
     command: echo {{ $hostname }} > $ROOTDIR/etc/hostname
 
-  - description: "Install core and desktop {{ $desktop }}"
+  - description: "Install core"
     action: apt
     recommends: true
     packages:
       - kali-linux-core
-  {{ if eq $desktop "headless" }}
-      - kali-linux-headless
-  {{ else }}
+
+  {{ if ne $desktop "headless" }}
+  - description: "Install desktop selection: {{ $desktop }}"
+    action: apt
+    recommends: true
+    packages:
       - kali-desktop-{{ $desktop }}
   {{ end }}
 
