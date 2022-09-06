@@ -62,7 +62,6 @@ actions:
     recommends: true
     packages:
       - kali-linux-{{ $toolset }}
-      - kali-tools-top10
   {{ end }}
 
   {{ if ne $packages "" }}
