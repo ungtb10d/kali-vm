@@ -147,10 +147,10 @@ Customization options:
               Supported values: $SUPPORTED_DESKTOPS
   -L LOCALE   Set locale, default: $(b $DEFAULT_LOCALE)
   -P PACKAGES Install extra packages (comma/space separated list)
-  -S TOOLSET  The selection of tools to include in the image, default: $(b $(default_toolset))
+  -T TOOLSET  The selection of tools to include in the image, default: $(b $(default_toolset))
               Supported values: $SUPPORTED_TOOLSETS
-  -T TIMEZONE Set timezone, default: $(b $DEFAULT_TIMEZONE)
   -U USERPASS Username and password, separated by a colon, default: $(b $DEFAULT_USERPASS)
+  -Z TIMEZONE Set timezone, default: $(b $DEFAULT_TIMEZONE)
 
 The different variants of images are:
   generic     Image with all virtualization support pre-installed, default format: raw
@@ -173,7 +173,7 @@ Supported environment variables:
 Refer to the README for examples.
 "
 
-while getopts ":a:b:D:f:hkL:m:P:r:s:S:T:U:v:x:z" opt; do
+while getopts ":a:b:D:f:hkL:m:P:r:s:T:U:v:x:zZ:" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
@@ -186,12 +186,12 @@ while getopts ":a:b:D:f:hkL:m:P:r:s:S:T:U:v:x:z" opt; do
         (P) PACKAGES="$PACKAGES $OPTARG" ;;
         (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
-        (S) TOOLSET=$OPTARG ;;
-        (T) TIMEZONE=$OPTARG ;;
+        (T) TOOLSET=$OPTARG ;;
         (U) USERPASS=$OPTARG ;;
         (v) VARIANT=$OPTARG ;;
         (x) VERSION=$OPTARG ;;
         (z) ZIP=true ;;
+        (Z) TIMEZONE=$OPTARG ;;
         (*) echo "$USAGE" >&2; exit 1 ;;
     esac
 done
@@ -229,8 +229,8 @@ if [ "$ROOTFS" ]; then
     [ -z "$DESKTOP" ] || fail "Option -D can't be used together with option -r"
     [ -z "$LOCALE"  ] || fail "Option -L can't be used together with option -r"
     [ -z "$MIRROR"  ] || fail "Option -m can't be used together with option -r"
-    [ -z "$TIMEZONE" ] || fail "Option -T can't be used together with option -r"
-    [ -z "$TOOLSET"  ] || fail "Option -S can't be used together with option -r"
+    [ -z "$TIMEZONE" ] || fail "Option -Z can't be used together with option -r"
+    [ -z "$TOOLSET"  ] || fail "Option -T can't be used together with option -r"
     [ -z "$USERPASS" ] || fail "Option -U can't be used together with option -r"
     [ -z "$VERSION" ] || fail "Option -x can't be used together with option -r"
     ARCH=$(basename $ROOTFS | sed "s/\.tar\.gz$//" | rev | cut -d- -f1 | rev)

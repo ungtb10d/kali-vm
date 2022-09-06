@@ -72,7 +72,7 @@ Build options:
   -m MIRROR   Mirror used to build the image, default: http://http.kali.org/kali
   -r ROOTFS   Rootfs to use to build the image, default: none
   -s SIZE     Size of the disk image in GB, default: 80
-  -v VARIANT  Variant of image to build (see below for details), default: VARIANT
+  -v VARIANT  Variant of image to build (see below for details), default: generic
               Supported values: generic qemu rootfs virtualbox vmware
   -z          Zip images and metadata files after the build
 
@@ -81,10 +81,10 @@ Customization options:
               Supported values: e17 gnome i3 kde lxde mate none xfce
   -L LOCALE   Set locale, default: en_US.UTF-8
   -P PACKAGES Install extra packages (comma/space separated list)
-  -S TOOLSET  The selection of tools to include in the image, default: default
+  -T TOOLSET  The selection of tools to include in the image, default: default
               Supported values: default everything headless large none
-  -T TIMEZONE Set timezone, default: US/Eastern
   -U USERPASS Username and password, separated by a colon, default: kali:kali
+  -Z TIMEZONE Set timezone, default: US/Eastern
 
 The different variants of images are:
   generic     Image with all virtualization support pre-installed, default format: raw
@@ -128,7 +128,7 @@ Tools pre-installed. Also, with this command we decide to build the image
 from the last stable release of Kali, and we install the GNOME desktop
 environment, rather than the usual default XFCE.
 
-* `./build.sh -v virtualbox -s 150 -S everything`
+* `./build.sh -v virtualbox -s 150 -T everything`
 
 With the command above, we build a Kali Linux image tailored for VirtualBox. It
 produces the virtual disk and the metadata files so that the VM can be imported
@@ -136,14 +136,14 @@ produces the virtual disk and the metadata files so that the VM can be imported
 pre-installed. Moreover, we want a 150 GB disk, and we install the "everything"
 tool selection (that is, pretty much every tool in Kali).
 
-* `./build.sh -v generic -f ova -D none -S none -P metasploit-framework`
+* `./build.sh -v generic -f ova -D none -T none -P metasploit-framework`
 
 Above, we build a lightweight Kali image: no desktop environment and no default
 toolset.  This is a generic image, it comes with support for most VM engines
 out there.  We'll export it to the OVA format, suitable for both VMware and
 VirtualBox.  Let's also install the package `metasploit-framework`.
 
-* `./build.sh -L $LANG -T $(cat /etc/timezone) -U $USER:'s3cr3t!p4ssw0rd'`
+* `./build.sh -L $LANG -Z $(cat /etc/timezone) -U $USER:'s3cr3t!p4ssw0rd'`
 
 Above, we build a Kali rolling image, and configure it to mimic the host
 system: same locale, same timezone and same username.
@@ -187,7 +187,7 @@ image, and it's not meant to be used outside of this build system.
 ### Additional configuration
 
 You can choose the desktop environment with the `-D` option. You can also
-change the default selection of tools included in the image with the `-S`
+change the default selection of tools included in the image with the `-T`
 option.
 
 You can install additional packages with the `-P` option. Either use the option
@@ -198,7 +198,7 @@ To set the `locale`, use the option `-L`.  Pick a value in the 1st column of
 `/usr/share/i18n/SUPPORTED`, or check what's configured on your system with
 `grep -v ^# /etc/locale.gen`, or simply `echo $LANG`.
 
-To set the `timezone`, use the option `-T`. Look into `/usr/share/zoneinfo` and
+To set the `timezone`, use the option `-Z`. Look into `/usr/share/zoneinfo` and
 pick a directory and a sub-directory. In doubt, run `tzselect` to guide you, or
 look at what's configured on your system with `cat /etc/timezone`.
 
@@ -206,7 +206,7 @@ To set the name and password for the unprivileged user, use the option `-U`.
 The value is a single string and the `:` is used to separate the username from
 the password.
 
-Pro tip: you can use `-L $LANG -T $(cat /etc/timezone) -U $USER:$USER` to
+Pro tip: you can use `-L $LANG -Z $(cat /etc/timezone) -U $USER:$USER` to
 configure the image like your own machine.
 
 ### Caching proxy configuration
