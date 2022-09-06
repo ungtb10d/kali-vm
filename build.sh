@@ -407,7 +407,6 @@ cat << EOF
                                             .'
                                              .
 
-Successful build! Find your Kali Linux image at
-$(b $OUTPUT).
+Successful build! Find your Kali Linux image at: $(b $OUTPUT)
 
 EOF
