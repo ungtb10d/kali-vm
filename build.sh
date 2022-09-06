@@ -12,8 +12,8 @@ DETECTED_CACHING_PROXY=
 
 SUPPORTED_ARCHITECTURES="amd64 i386"
 SUPPORTED_BRANCHES="kali-dev kali-last-snapshot kali-rolling"
-SUPPORTED_DESKTOPS="e17 gnome headless i3 kde lxde mate xfce"
-SUPPORTED_TOOLSETS="default everything large none"
+SUPPORTED_DESKTOPS="e17 gnome i3 kde lxde mate none xfce"
+SUPPORTED_TOOLSETS="default everything headless large none"
 
 SUPPORTED_FORMATS="ova ovf raw qemu virtualbox vmware"
 SUPPORTED_VARIANTS="generic qemu rootfs virtualbox vmware"
@@ -46,7 +46,7 @@ VARIANT=generic
 VERSION=
 ZIP=false
 
-default_toolset() { [ ${DESKTOP:-$DEFAULT_DESKTOP} = headless ] && echo none || echo default; }
+default_toolset() { [ ${DESKTOP:-$DEFAULT_DESKTOP} = none ] && echo headless || echo default; }
 default_version() { echo ${BRANCH:-$DEFAULT_BRANCH} | sed "s/^kali-//"; }
 
 # Output bold only if both stdout/stderr are opened on a terminal

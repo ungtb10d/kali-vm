@@ -78,11 +78,11 @@ Build options:
 
 Customization options:
   -D DESKTOP  Desktop environment installed in the image, default: xfce
-              Supported values: e17 gnome headless i3 kde lxde mate xfce
+              Supported values: e17 gnome i3 kde lxde mate none xfce
   -L LOCALE   Set locale, default: en_US.UTF-8
   -P PACKAGES Install extra packages (comma/space separated list)
   -S TOOLSET  The selection of tools to include in the image, default: default
-              Supported values: default everything large none
+              Supported values: default everything headless large none
   -T TIMEZONE Set timezone, default: US/Eastern
   -U USERPASS Username and password, separated by a colon, default: kali:kali
 
@@ -136,7 +136,7 @@ produces the virtual disk and the metadata files so that the VM can be imported
 pre-installed. Moreover, we want a 150 GB disk, and we install the "everything"
 tool selection (that is, pretty much every tool in Kali).
 
-* `./build.sh -v generic -f ova -D headless -P metasploit-framework`
+* `./build.sh -v generic -f ova -D none -S none -P metasploit-framework`
 
 Above, we build a lightweight Kali image: no desktop environment and no default
 toolset.  This is a generic image, it comes with support for most VM engines

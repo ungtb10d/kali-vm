@@ -52,7 +52,7 @@ actions:
     recommends: true
     packages:
       - kali-linux-core
-  {{ if ne $desktop "headless" }}
+  {{ if ne $desktop "none" }}
       - kali-desktop-{{ $desktop }}
   {{ end }}
 
