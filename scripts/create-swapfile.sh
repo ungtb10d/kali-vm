@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eux
+set -eu
 
 for i in $(seq 1 5); do
     fallocate -v -l 1G /swapfile && break
