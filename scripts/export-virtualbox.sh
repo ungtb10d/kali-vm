@@ -2,6 +2,8 @@
 
 set -eu
 
+START_TIME=$(date +%s)
+
 keep=0
 image=
 zip=0
@@ -30,3 +32,7 @@ if [ $zip -eq 1 ]; then
     mv $image.vdi $image.vbox $image
     7zr a -sdel -mx=9 $image.7z $image
 fi
+
+for fn in $image.*; do
+    [ $(stat -c %Y $fn) -ge $START_TIME ] && echo $fn
+done > .artifacts

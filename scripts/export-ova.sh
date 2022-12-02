@@ -2,6 +2,8 @@
 
 set -eu
 
+START_TIME=$(date +%s)
+
 keep=0
 image=
 zip=0
@@ -39,3 +41,7 @@ tar -cvf $image.ova $image.ovf $image.vmdk $image.mf
 # Since the disk is already compressed (streamOptimized means
 # deflate compression with zlib),  there's nothing to gain by
 # compressing the .ova again. So we ignore the '-z' option.
+
+for fn in $image.*; do
+    [ $(stat -c %Y $fn) -ge $START_TIME ] && echo $fn
+done > .artifacts

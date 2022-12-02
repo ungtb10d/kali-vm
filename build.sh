@@ -416,6 +416,6 @@ cat << EOF
                                             .'
                                              .
 
-Successful build! Find your Kali Linux image at: $(b $OUTPUT)
-
+Successful build! The following build artifacts were produced:
 EOF
+cat $OUTDIR/.artifacts | sed "s:^:* $OUTDIR/:"
