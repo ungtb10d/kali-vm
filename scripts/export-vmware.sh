@@ -15,18 +15,17 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+cd $ARTIFACTDIR
+
 echo "INFO: Generate $image.vmdk"
 rm -fr $image.vmwarevm && mkdir $image.vmwarevm
 qemu-img convert -O vmdk -o subformat=twoGbMaxExtentSparse \
-    $image.raw $image.vmwarevm/$(basename $image).vmdk
+    $image.raw $image.vmwarevm/$image.vmdk
 
 [ $keep -eq 1 ] || rm -f $image.raw
 
 echo "INFO: Generate $image.vmx"
-scripts/generate-vmx.sh $image.vmwarevm/$(basename $image).vmdk
-
-cd $(dirname $image)
-image=$(basename $image)
+$RECIPEDIR/scripts/generate-vmx.sh $image.vmwarevm/$image.vmdk
 
 if [ $zip -eq 1 ]; then
     echo "INFO: Compress to $image.7z"

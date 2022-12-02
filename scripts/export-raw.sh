@@ -13,11 +13,10 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+cd $ARTIFACTDIR
+
 echo "INFO: Rename to $image.img"
 mv -v $image.raw $image.img
-
-cd $(dirname $image)
-image=$(basename $image)
 
 if [ $zip -eq 1 ]; then
     echo "INFO: Dig holes in the sparse file"

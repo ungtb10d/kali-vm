@@ -15,16 +15,14 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+cd $ARTIFACTDIR
+
 echo "INFO: Generate $image.vdi"
 qemu-img convert -O vdi $image.raw $image.vdi
-
 [ $keep -eq 1 ] || rm -f $image.raw
 
 echo "INFO: Generate $image.vbox"
-scripts/generate-vbox.sh $image.vdi
-
-cd $(dirname $image)
-image=$(basename $image)
+$RECIPEDIR/scripts/generate-vbox.sh $image.vdi
 
 if [ $zip -eq 1 ]; then
     echo "INFO: Compress to $image.7z"

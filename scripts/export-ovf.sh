@@ -15,19 +15,18 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+cd $ARTIFACTDIR
+
 echo "INFO: Generate $image.vmdk"
 qemu-img convert -O vmdk $image.raw $image.vmdk
 
 [ $keep -eq 1 ] || rm -f $image.raw
 
 echo "INFO: Generate $image.ovf"
-scripts/generate-ovf.sh $image.vmdk
+$RECIPEDIR/scripts/generate-ovf.sh $image.vmdk
 
 echo "INFO: Generate $image.mf"
-scripts/generate-mf.sh $image.ovf $image.vmdk
-
-cd $(dirname $image)
-image=$(basename $image)
+$RECIPEDIR/scripts/generate-mf.sh $image.ovf $image.vmdk
 
 if [ $zip -eq 1 ]; then
     echo "INFO: Compress to $image.7z"

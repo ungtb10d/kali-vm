@@ -15,13 +15,12 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+cd $ARTIFACTDIR
+
 echo "INFO: Generate $image.qcow2"
 qemu-img convert -O qcow2 $image.raw $image.qcow2
 
 [ $keep -eq 1 ] || rm -f $image.raw
-
-cd $(dirname $image)
-image=$(basename $image)
 
 if [ $zip -eq 1 ]; then
     echo "INFO: Compress to $image.7z"
