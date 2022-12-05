@@ -198,7 +198,7 @@ shift $((OPTIND - 1))
 
 # What's left on the command-line are optional arguments for debos.
 # Let's check if user wants to use a particular artifact directory.
-ARTIFACTDIR_ARG=$(echo "$@" | grep -o -- "--artifactdir[= ][^ ]\+")
+ARTIFACTDIR_ARG=$(echo "$@" | grep -o -- "--artifactdir[= ][^ ]\+" || :)
 if [ "$ARTIFACTDIR_ARG" ]; then
     OUTDIR=$(echo "$ARTIFACTDIR_ARG" | sed "s/^.*[= ]//")
 else
