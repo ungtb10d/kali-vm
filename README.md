@@ -7,7 +7,7 @@ Recipes to build Kali Linux Virtual Machine (VM) images.
 Make sure that the Git repo is cloned locally:
 
 ```
-sudo apt install git
+apt install git
 git clone https://github.com/ungtb10d/kali-vm.git
 cd kali-vm/
 ```
