@@ -8,7 +8,7 @@ Make sure that the Git repo is cloned locally:
 
 ```
 sudo apt install git
-git clone https://gitlab.com/kalilinux/build-scripts/kali-vm.git
+git clone https://github.com/ungtb10d/kali-vm.git
 cd kali-vm/
 ```
 
